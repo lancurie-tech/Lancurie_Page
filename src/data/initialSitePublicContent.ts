@@ -1,0 +1,268 @@
+import type { SitePublicContent } from '@/types/sitePublicContent';
+
+/**
+ * Conteúdo editorial inicial (PT) — referência para subir a `siteCopy` / `publicContent` no Firebase.
+ * Não importado no bundle do site; pode usar `npm run seed:export` para gerar JSON em `docs/firebase-seed/`.
+ */
+export const INITIAL_SITE_PUBLIC_CONTENT: SitePublicContent = {
+  brandName: 'Lancurie Technology',
+  nav: {
+    home: 'Início',
+    proof: 'Projetos de destaque',
+    services: 'Serviços',
+    process: 'Processo',
+    about: 'A empresa',
+    approach: 'Abordagem',
+    contact: 'Contato',
+    cases: 'Clientes e casos',
+  },
+  hero: {
+    kicker: 'Engenharia de produto · dados · IA quando faz sentido',
+    line1: 'Da operação caótica ao software que aguenta o dia a dia.',
+    line2:
+      'Sem “IA de vitrine”: quando couber, produto e assinatura; quando não couber, projeto sob medida com manutenção; quando o escopo ainda for neblina, diagnóstico pago antes de código em massa.',
+    subtitle:
+      'Bloco editável no admin — use para prazo, stack, geografia e prova social. Este texto é placeholder até você ajustar no painel.',
+    graphBrainLabel: '',
+    graphAria: '',
+    scrollHint: 'Explorar',
+    ctaPrimary: 'Agendar conversa',
+    ctaSecondary: 'Ver modelos de envolvimento',
+  },
+  trust: {
+    line:
+      'Entrega sênior · foco em produção, não em slide · resposta comercial em horário útil',
+  },
+  proof: {
+    kicker: 'Na prática',
+    title: 'Provas e prioridades (placeholder)',
+    lead:
+      'Substitua estes três cartões no admin por cases reais ou por mensagens comerciais alinhadas ao seu GTM. Abaixo ficam exemplos genéricos só para não deixar a secção vazia.',
+    cards: [
+      {
+        badge: 'Saúde · entrega de produto',
+        title: 'MEDIVOX',
+        body:
+          'Entrega de software a sério em contexto de saúde. O fecho comercial é em projeto, seguido de prestação de serviços (por exemplo 8 h/mês) para continuidade, pequena evolução e suporte — não “mensalidade de aluguer” genérica do produto.',
+      },
+      {
+        badge: 'E-commerce B2C',
+        title: 'Loja e operação online',
+        body:
+          'E‑commerce com operação a sério, usado como ativo de portfólio. Para o mercado, replicamos o padrão loja + cuidado contínuo quando o encaixe e o escopo estão claros.',
+      },
+      {
+        badge: 'Plataforma · prioridade de produto',
+        title: 'MRBarber (plataforma para barbearias)',
+        body:
+          'Plataforma vertical: clientes, testes com operadores e vendedores do ramo a levar a solução a mais barbearias. Ticket e alavancagem acima de um site avulso — é aqui que concentrámos o desenvolvimento de produto após a base de manutenção estar estável.',
+      },
+    ],
+  },
+  products: [
+    {
+      id: 'plataforma-vertical',
+      title: 'Plataforma vertical (ex.: operação em rede)',
+      tagline: 'SaaS com canal comercial, não só fatura mensal muda.',
+      body:
+        'Concebido para quem precisa de multi-tenant, funções de operação, integrações e um caminho de escala. Inclui desenho de domínio, entrega e observabilidade.',
+      bullets:
+        'Mapa de domínio e risco técnico\nPapel do produto, tenant e faturamento mínimo\nPós go-live: retainer e priorização por impacto',
+      imageUrl: '',
+      focalX: 50,
+      focalY: 50,
+    },
+    {
+      id: 'software-sob-medida',
+      title: 'Software sob medida + manutenção',
+      tagline: 'Da descoberta à produção, com a mesma equipa no pós-entrega.',
+      body:
+        'Indicado quando integração, compliance ou legado exigem equipa dedicada. Estruturamos fases, entregáveis e um plano pós go-live com evolução contínua.',
+      bullets:
+        'Descoberta e corte de escopo com números\nReleases com critério de pronto\nManutenção: evolução, suporte e incidentes',
+      imageUrl: '',
+      focalX: 50,
+      focalY: 50,
+    },
+    {
+      id: 'ecommerce-operacao',
+      title: 'E-commerce e operação B2C',
+      tagline: 'Loja que aguenta operação, não só vitrine.',
+      body:
+        'Para catálogo, logística e pagamentos com foco em operação real. Menos “site bonito”, mais fluxo de encomenda, excepções e back-office funcional.',
+      bullets:
+        'Foco em exceções e reembolsos\nIntegrações mínimas necessárias\nObservabilidade e alertas básicos',
+      imageUrl: '',
+      focalX: 50,
+      focalY: 50,
+    },
+  ],
+  cases: {
+    kicker: 'Provas reais',
+    title: 'Clientes e o que fizeram sentido no terreno',
+    lead:
+      'Não entram cases “de fachada”: o que podes ver aqui está alinhado ao que publicamos, com a equipa a acompanhar ou a ter acompanhado a entrega.',
+    empty: 'Ainda sem casos publicados. Volta em breve — ou fala connosco e pode ser o teu o próximo.',
+  },
+  audience: {
+    kicker: 'Como encaixamos',
+    title: 'Três formas de trabalhar (placeholder)',
+    body:
+      '1) Produto / assinatura quando o módulo já resolve a maior parte.\n\n2) Projeto sob medida + manutenção quando integração, compliance ou legado exigem time dedicado.\n\n3) Diagnóstico pago quando ainda não dá para estimar com segurança — mapa, riscos e números antes de escalar código.\n\nEdite este bloco no admin para refletir o que você realmente vende.',
+  },
+  engagement: {
+    kicker: 'Modelos de envolvimento',
+    title: 'Escolha o formato que combina com o problema',
+    lead:
+      'Texto placeholder: ajuste no admin. Se o caso misturar modelos, é normal — a conversa começa pela triagem, não pelo rótulo.',
+    cards: [
+      {
+        title: 'Assinatura / produto',
+        body: 'Módulo claro, custo previsível, roadmap partilhado. Faz sentido quando o desenho do produto já contém 70% do que precisas e o resto é parametrismo e ligação de dados.',
+      },
+      {
+        title: 'Entrega a medida + manutenção',
+        body: 'Time-boxed ou por fase, com retainer pós go-live. Ideal quando a operação, integrações e compliance não cabem em “caixa SaaS pronta”.',
+      },
+      {
+        title: 'Diagnóstico e alinhamento (pago)',
+        body: 'Quando ainda não dá para estimar: arquitectura, riscos, e um plano com números. Só dá a seguir a execução se houver acordo mútuo de encaixe.',
+      },
+    ],
+  },
+  faq: {
+    title: 'Dúvidas comuns (sem marketing vazio)',
+    items: [
+      {
+        q: 'Vocês são uma “agência de IA”?',
+        a: 'Aplicamos IA e automação quando retiram fricção real. Se o problema for processo, dados, integração ou plataforma, a solução pode nem passar por modelo generativo. Sem buzzword, com engenharia a sério.',
+      },
+      {
+        q: 'E se eu só quiser orçamento?',
+        a: 'Envia contexto (objectivo, integrações, prazo) pelo formulário. Se for insuficiente, propomos uma chamada curta ou diagnóstico pago, conforme complexidade. Nada de “RFP de 20 páginas” por email sem conversa mínima.',
+      },
+      {
+        q: 'Onde a Lancurie está a investir a seguir?',
+        a: 'Em produto vertical com tração (ex.: plataforma para barbearias) e manutenção de entregas em saúde e e‑commerce. Tudo o que for novo passa o mesmo pente de risco, tempo e alinhamento com a operação de quem paga a factura.',
+      },
+    ],
+  },
+  services: {
+    title: 'Catálogo de ofertas (placeholder)',
+    lead:
+      'Publique cartões de serviço no admin para alimentar o carrossel abaixo. Enquanto isso, este parágrafo e os produtos de exemplo servem só de guia visual.',
+    cta: 'Ver detalhe do serviço',
+    empty: 'Ainda sem cartões de serviço publicados neste ambiente. Usa o contacto; diz o tipo de gargalo e a equipa responde com o próximo passo honesto.',
+  },
+  process: {
+    title: 'Processo aproximado',
+    lead: 'A ordem adapta-se ao tipo de projecto, mas a postura é sempre: contexto, entrega honesta, depois ajuste e continuidade.',
+    cta: 'Pedir o próximo passo',
+    steps: [
+      {
+        title: 'Triagem e alinhamento',
+        body: 'O que dói, com que dados, e que restrições (tempo, budget, leis, herança técnica). Sem isto, não há estimativa sólida.',
+      },
+      {
+        title: 'Desenho e prova mínima',
+        body: 'Corte de escopo, arquitectura, risco, e o menor incremento que já testa a hipótese no teu contexto. Sem “MVP de vitrine”.',
+      },
+      {
+        title: 'Produção e acompanhamento',
+        body: 'Go-live com observabilidade, canais de suporte, e acordo de evolução (quando aplica) — o mesmo grupo que pensa é o que sustenta a operação.',
+      },
+    ],
+  },
+  about: {
+    kicker: 'A empresa',
+    title: 'Lancurie Technology',
+    body:
+      'Equipa sénior a focar no que a operação e o produto precisam, sem inflacionar a equipa. Trabalhamos com clientes e com produtos nossos em sectores de maior fricção (saúde, operação, verticais com canal). Tecnologia, dados e entrega, num só fluxo.',
+  },
+  principles: {
+    title: 'O que rejeitámos cedo na conversa',
+    lead: 'Três regras que poupam tempo a ambos os lados.',
+    items: [
+      {
+        title: 'Nada de desfile de slides a substituir entrega',
+        body: 'Se o próximo passo for só apresentar mais uma deck, dizemos não. Prova em ambiente, ou não há conversa a sério.',
+      },
+      {
+        title: 'Escala sem fundação a sério, não puxamos',
+        body: 'Sem observabilidade, dono de dados e alinhamento com a operação, “escalar com IA” é título de LinkedIn, não entrega no terreno.',
+      },
+      {
+        title: 'Transparência no que não dá e no que dói a mudar',
+        body: 'Preferimos dizer o “não” a tempo do que o “já vamos aí” a arrastar meses. O mesmo se aplica a dependências técnicas e legais.',
+      },
+    ],
+  },
+  contact: {
+    title: 'Contato',
+    lead:
+      'Usa o formulário com contexto, ou o email. A mesma equipa lê os dois. Quanto mais dado, mais rápido o encaminhamento.',
+    emailLabel: 'E-mail',
+    whatsappCta: 'WhatsApp',
+    cta: 'Escrever para nós',
+    drawerCta: 'Diga-nos o que precisa',
+    drawer: {
+      title: 'Diga-nos o que precisa',
+      lead: 'A mensagem cai numa fila comum: email e WhatsApp. Sem fila falsa, sem resposta de bot.',
+    },
+    form: {
+      name: 'Nome completo',
+      email: 'Email',
+      whatsapp: 'WhatsApp (com indicativo)',
+      company: 'Empresa / projecto (opcional)',
+      needType: 'O que se aproxima mais?',
+      needModular: 'Plataforma modular',
+      needBespoke: 'Projeto à medida',
+      needClientInfra: 'Na minha cloud / o meu produto',
+      needAutomation: 'Automação e agentes',
+      needConsulting: 'Dados e consultoria',
+      needOther: 'Ainda não sei',
+      message: 'Resumo da necessidade',
+      privacy: 'Autorizo contato em resposta a este pedido.',
+      submit: 'Enviar por email',
+      openWhatsapp: 'Abrir WhatsApp',
+      cancel: 'Cancelar',
+      emailProductLine: 'Pedir informações',
+    },
+  },
+  footer: {
+    rights: 'Todos os direitos reservados',
+    built: 'Site e operações: Lancurie Technology',
+    locationLine: 'Porto · PT · Remote-first',
+    emailUs: 'E-mail comercial',
+    socialAria: 'Ligação social (site)',
+  },
+  serviceDetail: {
+    back: 'Voltar ao site',
+    contactCta: 'Falar deste serviço',
+  },
+  welcome: {
+    line: 'A carregar a experiência',
+  },
+  marketing: { subnavAria: 'Navegação de secções da home' },
+  login: {
+    title: 'Área de administração',
+    emailLabel: 'Email',
+    passwordLabel: 'Palavra-passe',
+    submit: 'Entrar',
+  },
+  a11y: {
+    closeContactDrawer: 'Fechar painel de contacto',
+    openMenu: 'Abrir menu',
+    closeMenu: 'Fechar menu',
+    subnavPrev: 'Itens anteriores',
+    subnavNext: 'Mais itens',
+    utilitiesMenu: 'Menu',
+  },
+  ui: {
+    login: 'Início de sessão',
+    theme: 'Tema',
+    themeLight: 'Claro',
+    themeDark: 'Escuro',
+    paletteTone: 'warm',
+  },
+};

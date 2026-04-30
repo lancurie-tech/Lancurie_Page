@@ -1,0 +1,32 @@
+---
+description: Orquestração por fases — Fiscais (geral, UX, visual) + PODs; site público e admin
+globs: src/pages/**/*.tsx,src/components/**/*.tsx,src/layouts/**/*.tsx,src/pages/admin/**/*.tsx,src/i18n/**/*.ts,src/index.css,docs/**
+alwaysApply: false
+---
+
+# Orquestração — evolução do site Lancurie
+
+Quando a tarefa tocar **marketing / home / admin de conteúdo / design system / copy do site**, seguir o plano em **`docs/PLANEJAMENTO-EVOLUCAO-SITE.md`** (fases, gates, fiscais).
+
+## Papel dos Fiscais (revisão obrigatória antes de “fase fechada”)
+
+1. **Fiscal-geral** — coerência de marca, promessas, escopo, risco (Lancurie = resolução de problemas + três vias de envolvimento).
+2. **Fiscal-UX** — jornada, mobile, formulários, *admin* usável, estados *loading*/*erro*.
+3. **Fiscal-Visual** — cor e acento com intenção (não *arco-íris*), profundidade, tipografia, referência *craft* tipo [21st.dev](https://21st.dev/) / Vercel / Linear — com parcimónia.
+
+## PODs (executor + revisor)
+
+Não entregar código “de primeira” sem **auto-crítica** explícita do ponto de vista do *revisor* do POD (checklist curta). Conflitos entre fiscais: **Fiscal-geral** desempata.
+
+## Admin
+
+Tratar **painel de conteúdo e produtos** como parte do produto: mesma linha *dark*, hierarquia clara, feedback imediato ao *Guardar* / *sync*.
+
+## Liberdade de *layout* (não congelar o actual)
+
+- O *UI* **actual** (secções, *hero*, *grelha*) **não** é regra: **peso, modernidade e clareza** têm prioridade sobre preservar a estrutura antiga. Propor **1–2 assinaturas** fortes (ex.: *motion* no *hero*, *bento*/*glass*, *elemento* *tipo* *rede*/*grafo* *legível* — *CSS/SVG* *primeiro*; *canvas* *lazy* *se* *necessário*).
+- **Fiscal-Visual** lidera o “*top* *demais* *sem* *noise*”. **Fiscal-UX** corta tudo o que atrapalhe *tarefa* (contacto, *scroll*, *mobile*). **Fiscal-geral** segura a narrativa: *Lancurie* = solução de problemas, não *demo* *vazia*.
+
+## Lembrete
+
+*Glamour* preferencialmente com **CSS**; *JS* *pesado* e *canvas* *deferred*; animações a respeitar `prefers-reduced-motion`; *ROI* (LCP, *bundle*).

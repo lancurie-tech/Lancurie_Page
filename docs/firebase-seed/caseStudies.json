@@ -1,0 +1,32 @@
+[
+  {
+    "titlePt": "Entrega em contexto de saúde (MEDIVOX)",
+    "titleEn": "",
+    "summaryPt": "Ciclo de software a sério com requisitos e continuidade: projeto seguido de retainer, evolução controlada e suporte, sem a promessa vã de “SaaS que resolve tudo”.",
+    "summaryEn": "",
+    "clientLabel": "Projeto conduzido com equipa sénior Lancurie",
+    "order": 0,
+    "published": true,
+    "imageUrl": ""
+  },
+  {
+    "titlePt": "E-commerce com operação a sério",
+    "titleEn": "",
+    "summaryPt": "Referência de loja e operação usada no portfólio; replicamos o padrão quando o encaixe e o escopo estão alinhados com o vosso negócio.",
+    "summaryEn": "",
+    "clientLabel": "B2C · operação contínua",
+    "order": 1,
+    "published": true,
+    "imageUrl": ""
+  },
+  {
+    "titlePt": "Plataforma MRBarber — rede de barbearias",
+    "titleEn": "",
+    "summaryPt": "Produto vertical com tração: clientes, testes de campo e crescimento de rede, com foco de produto pós manutenção estável noutros ativos.",
+    "summaryEn": "",
+    "clientLabel": "SaaS vertical · prioridade de roadmap",
+    "order": 2,
+    "published": true,
+    "imageUrl": ""
+  }
+]

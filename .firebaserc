@@ -1,0 +1,9 @@
+{
+  "projects": {
+    "default": "lancurie",
+    "prod": "lancurie",
+    "dev": "lancurie-dev"
+  },
+  "targets": {},
+  "etags": {}
+}

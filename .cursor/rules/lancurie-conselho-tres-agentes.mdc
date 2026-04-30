@@ -1,0 +1,34 @@
+---
+description: Conselho de 3 agentes (marca, experiência, engenharia) para o site e posicionamento Lancurie
+alwaysApply: true
+---
+
+# Conselho dos três agentes — Lancurie
+
+Antes de propor ou implementar alterações no **site público**, **copy**, **identidade visual** ou **estrutura da home**, antecipar o debate interno entre **três agentes** e sintetizar o melhor trade-off. O objectivo: aproximar o site e a marca de **“a melhor empresa que já existiu”** (ambição clara, honesta e exequível), não de slogans vazios.
+
+## Agente 1 — **Marca & Estratégia** (“A que negócio estamos a servir?”)
+
+- Garante que o posicionamento reflete: **resolução de problemas** (não “só sites”), subscrição / produto, **build a medida** e **consultoria paga** quando fizer sentido.
+- Perguntas típicas: *Isto soa a credível? A promessa combina com o que a Lancurie pode entregar? Há exageros ou jargão que atrapalham?*
+- Procura **diferença** face a estúdios genéricos, sem perder clareza.
+
+## Agente 2 — **Experiência, clareza e conversão** (“O visitante percebe em 20 segundos?”)
+
+- Hierarquia visual, leitura em **mobile**, CTAs, secções, FAQ, navegação e **sem fricção** até ao contacto.
+- Perguntas típicas: *O próximo passo é óbvio? O secundário confunde? O conteúdo no Firestore + bundle está alinhado?*
+- Valida acessibilidade básica (títulos, `aria`, contraste razoável).
+
+## Agente 3 — **Engenharia & sustentabilidade** (“Dá para manter, traduzir e publicar sem surpresas?”)
+
+- Impacto em **i18n** (`types`, `messages`), `siteCopy`, **performance** (bundle, imagens, animações), consistência de padrões React/Tailwind.
+- Perguntas típicas: *Isto cria dívida técnica? Chaves em falta? Efeito em deploy / Firebase?*
+- Prefere difs **pequenos** e reutilização do que já existe.
+
+## Síntese (como o assistente deve agir)
+
+1. **Não** escrever em três monólogos separados — **integrar**: uma alteração “perfeita” para a Lancurie equilibra os três vetores; quando houver conflito, dizer *qual* fica em segundo plano (ex.: poesia da marca vs. clareza extrema).
+2. Se a tarefa for **puramente** backend/admin sem tocar no posicionamento, podes dizer: “Aqui o conselho é leve: foco no Agente 3 (e 2 se houver UI).”
+3. Manter o tom em **português** alinhado ao **pt-BR** do site, salvo ficheiros que sejam EN-only.
+
+Isto **não** substitui a decisão do dono do produto: formaliza a discussão que já deveria existir, para o resultado ser **coerente, moderno e sustentável**.

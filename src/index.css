@@ -1,0 +1,252 @@
+@import 'tailwindcss';
+
+/* Tailwind v4: `dark:` alinhado ao tema do sistema (data-theme + .class no <html> via ThemeProvider). */
+@custom-variant dark (&:where(.dark, .dark *, [data-theme='dark'], [data-theme='dark'] *));
+
+@theme {
+  --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
+  /* Acento “tech” (referência: produtos B2B modernos) — usar com parcimónia */
+  --lancurie-accent: #38e1ff;
+  --lancurie-accent-secondary: #7c5cff;
+  --lancurie-accent-faint: color-mix(in srgb, var(--lancurie-accent) 22%, transparent);
+  --lancurie-surface-deep: #060b14;
+  --lancurie-surface-mid: #141d31;
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  min-height: 100vh;
+  font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
+  background: #060b14;
+  color: #f4f4f5;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+}
+
+html[data-theme='light'] body {
+  background: #f1f0ec;
+  color: #1c1917;
+}
+
+#root {
+  min-height: 100vh;
+}
+
+/* Home hero — textura de pontos muito suave (não é fotografia) */
+.lancurie-hero-dots {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgb(28 25 23 / 0.06) 1px,
+    transparent 0
+  );
+  background-size: 22px 22px;
+}
+
+html[data-theme='dark'] .lancurie-hero-dots {
+  background-image: radial-gradient(
+    circle at 1px 1px,
+    rgb(244 244 245 / 0.06) 1px,
+    transparent 0
+  );
+}
+
+/* Recepção — só o bloco de conteúdo central (sem “caixa” no logo) */
+@keyframes lancurie-welcome-content-in {
+  from {
+    opacity: 0;
+    transform: translateY(14px);
+  }
+  to {
+    opacity: 1;
+    transform: translateY(0);
+  }
+}
+
+.lancurie-welcome-content {
+  animation: lancurie-welcome-content-in 0.88s cubic-bezier(0.22, 1, 0.36, 1) 0.1s both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lancurie-welcome-content {
+    animation: none;
+    opacity: 1;
+  }
+}
+
+/* Carrossel horizontal de serviços (home) */
+@keyframes lancurie-services-marquee {
+  from {
+    transform: translateX(0);
+  }
+  to {
+    transform: translateX(-50%);
+  }
+}
+
+.lancurie-services-marquee {
+  animation: lancurie-services-marquee 40s linear infinite;
+}
+
+.lancurie-services-marquee:hover {
+  animation-play-state: paused;
+}
+
+.lancurie-proof-mobile-marquee {
+  animation: lancurie-services-marquee 22s linear infinite;
+}
+
+.lancurie-proof-mobile-marquee:hover {
+  animation-play-state: paused;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lancurie-services-marquee {
+    animation: none;
+  }
+
+  .lancurie-proof-mobile-marquee {
+    animation: none;
+  }
+}
+
+/* Recepção — clarão em ecrã inteiro: E→D, inversão curta, D→E
+   Opacity 0 no início enquanto o feixe desloca (evita halo central do blur+soft-light). */
+@keyframes lancurie-welcome-fullscreen-sweep {
+  0% {
+    transform: translateX(-108%) skewX(-11deg) scaleX(1.05);
+    opacity: 0;
+  }
+  12% {
+    transform: translateX(-56%) skewX(-10deg) scaleX(1.02);
+    opacity: 0;
+  }
+  17% {
+    opacity: 1;
+  }
+  40% {
+    transform: translateX(48%) skewX(-9deg) scaleX(1);
+    opacity: 0.9;
+  }
+  44% {
+    transform: translateX(54%) skewX(5deg) scaleX(1.01);
+    opacity: 0.5;
+  }
+  46% {
+    opacity: 1;
+  }
+  91% {
+    transform: translateX(-86%) skewX(9deg) scaleX(1.04);
+    opacity: 0.68;
+  }
+  100% {
+    transform: translateX(-94%) skewX(9deg) scaleX(1.05);
+    opacity: 0;
+  }
+}
+
+.lancurie-welcome-fullscreen-sweep {
+  position: absolute;
+  inset: -30% -55%;
+  width: auto;
+  min-width: 220%;
+  height: 160%;
+  /* Núcleo mais estreito = menos “luz fantasma” no centro com blur alto */
+  background: linear-gradient(
+    100deg,
+    transparent 0%,
+    rgba(255, 255, 255, 0) 36%,
+    rgba(255, 255, 255, 0.03) 44%,
+    rgba(255, 255, 255, 0.09) 48%,
+    rgba(255, 255, 255, 0.16) 50%,
+    rgba(255, 255, 255, 0.07) 52%,
+    rgba(255, 255, 255, 0.02) 58%,
+    rgba(255, 255, 255, 0) 68%,
+    transparent 100%
+  );
+  filter: blur(28px);
+  mix-blend-mode: soft-light;
+  pointer-events: none;
+  will-change: transform, opacity;
+  animation: lancurie-welcome-fullscreen-sweep 2.65s cubic-bezier(0.38, 0.02, 0.18, 1) 0.08s forwards;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lancurie-welcome-fullscreen-sweep {
+    animation: none;
+    opacity: 0;
+  }
+}
+
+/* Textura muito subtil na home editorial */
+.lancurie-grain {
+  background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.35'/%3E%3C/svg%3E");
+  opacity: 0.045;
+}
+
+/* Home — caixas “vidro” com profundidade editorial */
+.lancurie-glass-panel {
+  box-shadow:
+    0 0 0 1px rgb(255 255 255 / 0.05),
+    0 1px 0 0 rgb(255 255 255 / 0.04) inset,
+    0 24px 48px -20px rgb(0 0 0 / 0.55);
+}
+
+/* CTA primário: botão com volume suave (home) */
+.lancurie-hero-cta-primary {
+  background: linear-gradient(180deg, #fafaf9 0%, #e4e4e7 100%);
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.8) inset,
+    0 1px 2px rgb(0 0 0 / 0.12),
+    0 8px 24px -6px rgb(0 0 0 / 0.35);
+}
+.lancurie-hero-cta-primary:hover {
+  background: linear-gradient(180deg, #fff 0%, #f4f4f5 100%);
+  box-shadow:
+    0 1px 0 0 rgb(255 255 255 / 0.9) inset,
+    0 1px 2px rgb(0 0 0 / 0.1),
+    0 10px 28px -4px rgb(0 0 0 / 0.4);
+}
+
+.lancurie-faq details[open] .lancurie-faq-chevron {
+  transform: rotate(180deg);
+}
+
+/* Malha sutil (inspirada em grelhas de sites tech premium — só decoração) */
+.lancurie-hero-mesh {
+  background-image:
+    linear-gradient(to right, rgb(91 163 255 / 0.1) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(91 163 255 / 0.1) 1px, transparent 1px);
+  background-size: 56px 56px;
+  background-position: center -1px;
+  mask-image: linear-gradient(to bottom, rgb(0 0 0) 0%, rgb(0 0 0) 32%, transparent 88%);
+  -webkit-mask-image: linear-gradient(to bottom, rgb(0 0 0) 0%, rgb(0 0 0) 32%, transparent 88%);
+  mix-blend-mode: soft-light;
+}
+
+.lancurie-hero-aurora {
+  background:
+    radial-gradient(
+      ellipse 78% 52% at 48% 16%,
+      color-mix(in srgb, var(--lancurie-accent) 32%, transparent) 0%,
+      transparent 54%
+    ),
+    radial-gradient(
+      ellipse 55% 42% at 72% 18%,
+      color-mix(in srgb, var(--lancurie-accent-secondary) 25%, transparent) 0%,
+      transparent 58%
+    );
+  pointer-events: none;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .lancurie-hero-mesh {
+    opacity: 0.5;
+  }
+}
