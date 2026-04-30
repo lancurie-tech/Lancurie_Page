@@ -19,8 +19,8 @@
 #   VITE_FIREBASE_MESSAGING_SENDER_ID_DEV, VITE_FIREBASE_APP_ID_DEV
 #
 # Opcional — Settings → Secrets and variables → Actions → Variables:
-#   FIREBASE_PROJECT_DEV — ID GCP/Firebase do dev (default no YAML: lancurie-dev)
-#   FIREBASE_PROJECT_PROD — ID de produção (default: lancurie)
+#   FIREBASE_PROJECT_DEV — ID GCP/Firebase do dev (senão: secret VITE_FIREBASE_PROJECT_ID_DEV, senão lancurie-dev)
+#   FIREBASE_PROJECT_PROD — ID de produção (senão: secret VITE_FIREBASE_PROJECT_ID, senão lancurie)
 
 name: Deploy Firebase (dev + prod)
 
@@ -54,7 +54,7 @@ jobs:
       group: firebase-dev-${{ github.ref }}
       cancel-in-progress: true
     env:
-      FIREBASE_GCP_PROJECT: ${{ vars.FIREBASE_PROJECT_DEV || 'lancurie-dev' }}
+      FIREBASE_GCP_PROJECT: ${{ vars.FIREBASE_PROJECT_DEV || secrets.VITE_FIREBASE_PROJECT_ID_DEV || 'lancurie-dev' }}
       VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY_DEV }}
       VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN_DEV }}
       VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID_DEV }}
@@ -100,7 +100,7 @@ jobs:
           repoToken: ${{ secrets.GITHUB_TOKEN }}
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
           expires: 30d
-          projectId: ${{ vars.FIREBASE_PROJECT_DEV || 'lancurie-dev' }}
+          projectId: ${{ env.FIREBASE_GCP_PROJECT }}
 
       - name: Hosting — live (branch dev)
         if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
@@ -108,7 +108,7 @@ jobs:
         with:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
           channelId: live
-          projectId: ${{ vars.FIREBASE_PROJECT_DEV || 'lancurie-dev' }}
+          projectId: ${{ env.FIREBASE_GCP_PROJECT }}
 
       - name: Autenticar Google Cloud (Firestore dev)
         if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
@@ -128,7 +128,7 @@ jobs:
       group: firebase-prod-${{ github.ref }}
       cancel-in-progress: true
     env:
-      FIREBASE_GCP_PROJECT: ${{ vars.FIREBASE_PROJECT_PROD || 'site-lancurie' }}
+      FIREBASE_GCP_PROJECT: ${{ vars.FIREBASE_PROJECT_PROD || secrets.VITE_FIREBASE_PROJECT_ID || 'lancurie' }}
       VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
       VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
       VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
@@ -160,7 +160,7 @@ jobs:
         with:
           firebaseServiceAccount: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
           channelId: live
-          projectId: ${{ vars.FIREBASE_PROJECT_PROD || 'lancurie' }}
+          projectId: ${{ env.FIREBASE_GCP_PROJECT }}
 
       - name: Autenticar Google Cloud (Firestore prod)
         uses: google-github-actions/auth@v2
