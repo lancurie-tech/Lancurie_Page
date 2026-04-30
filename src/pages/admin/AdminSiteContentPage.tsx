@@ -128,7 +128,7 @@ export function AdminSiteContentPage() {
     setBanner(null);
     setHomeProductImageUploading((m) => ({ ...m, [index]: true }));
     try {
-      const objectRef = ref(storage, `siteCopy/home-products/product-${index + 1}`);
+      const objectRef = ref(storage, `site/assets/products/product-${index + 1}`);
       await uploadBytes(objectRef, file, { contentType: file.type || 'application/octet-stream' });
       const url = await getDownloadURL(objectRef);
       setDraft((d) => ({

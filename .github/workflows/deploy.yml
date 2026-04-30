@@ -1,7 +1,7 @@
 # Deploy Firebase: projeto DEV separado (Firestore/Auth próprios) e projeto PROD.
 #
-# - Push ou workflow_dispatch na branch **dev** → Hosting live + Firestore no projeto dev.
-# - Push ou workflow_dispatch na **main** → Hosting live + Firestore no projeto prod.
+# - Push ou workflow_dispatch na branch **dev** → Hosting live + Firestore + Storage rules no projeto dev.
+# - Push ou workflow_dispatch na **main** → Hosting live + Firestore + Storage rules no projeto prod.
 # - Qualquer **PR** com base em `main` ou `dev` → preview de Hosting só no projeto **dev**,
 #   build com credenciais **dev** (não usa o banco de prod durante revisão).
 #
@@ -116,9 +116,9 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT_DEV }}
 
-      - name: Firestore — regras e índices (dev)
+      - name: Firestore + Storage rules (dev)
         if: github.ref == 'refs/heads/dev' && (github.event_name == 'push' || github.event_name == 'workflow_dispatch')
-        run: npx firebase-tools@latest deploy --only firestore --project "$FIREBASE_GCP_PROJECT" --non-interactive
+        run: npx firebase-tools@latest deploy --only firestore,storage --project "$FIREBASE_GCP_PROJECT" --non-interactive
 
   deploy-prod:
     name: Produção (main)
@@ -167,5 +167,5 @@ jobs:
         with:
           credentials_json: ${{ secrets.FIREBASE_SERVICE_ACCOUNT }}
 
-      - name: Firestore — regras e índices (prod)
-        run: npx firebase-tools@latest deploy --only firestore --project "$FIREBASE_GCP_PROJECT" --non-interactive
+      - name: Firestore + Storage rules (prod)
+        run: npx firebase-tools@latest deploy --only firestore,storage --project "$FIREBASE_GCP_PROJECT" --non-interactive

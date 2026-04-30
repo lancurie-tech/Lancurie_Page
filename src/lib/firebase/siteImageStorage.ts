@@ -3,7 +3,7 @@ import type { SiteImageKey } from '@/data/siteImageConfig';
 import { storage } from '@/lib/firebase/config';
 
 /** Caminho fixo por chave: novo upload substitui o objeto (sem acumular ficheiros). */
-const STORAGE_PREFIX = 'siteCopy/images';
+const STORAGE_PREFIX = 'site/assets/images';
 
 export const SITE_IMAGE_UPLOAD_MAX_BYTES = 5 * 1024 * 1024;
 
@@ -37,7 +37,7 @@ export async function uploadSiteImageFile(key: SiteImageKey, file: File): Promis
 }
 
 /**
- * Ao gravar o Firestore: apaga o blob em `siteCopy/images/{key}` quando o site deixa de usar
+ * Ao gravar o Firestore: apaga o blob em `site/assets/images/{key}` quando o site deixa de usar
  * um ficheiro no Storage para essa chave (campo vazio ou URL externa /public). Re-upload na
  * mesma chave já substituiu o objeto; se `next` continua a ser URL do Storage, não apaga.
  */
