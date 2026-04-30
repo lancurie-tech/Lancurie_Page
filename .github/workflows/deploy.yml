@@ -128,7 +128,7 @@ jobs:
       group: firebase-prod-${{ github.ref }}
       cancel-in-progress: true
     env:
-      FIREBASE_GCP_PROJECT: ${{ vars.FIREBASE_PROJECT_PROD || 'lancurie' }}
+      FIREBASE_GCP_PROJECT: ${{ vars.FIREBASE_PROJECT_PROD || 'site-lancurie' }}
       VITE_FIREBASE_API_KEY: ${{ secrets.VITE_FIREBASE_API_KEY }}
       VITE_FIREBASE_AUTH_DOMAIN: ${{ secrets.VITE_FIREBASE_AUTH_DOMAIN }}
       VITE_FIREBASE_PROJECT_ID: ${{ secrets.VITE_FIREBASE_PROJECT_ID }}
