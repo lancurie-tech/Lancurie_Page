@@ -1,16 +1,25 @@
-import { useEffect, useId, useMemo, useRef, useState } from 'react';
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { MessageCircle, Sparkles, X } from 'lucide-react';
+import { MessageCircle, Send, X } from 'lucide-react';
 import { usePublicSiteSettings } from '@/contexts/usePublicSiteSettings';
 import { useSiteImageUrl } from '@/hooks/useSiteImage';
 import { cn } from '@/lib/cn';
 
 const WHATSAPP_INTRO = 'Olá, gostaria de saber mais sobre os serviços da Lancurie.';
 
-/**
- * Lançador de chat (canto inferior direito) — placeholder até existir IA.
- * Por agora redireciona para WhatsApp; preserva slot para conversa real.
- */
+type ChatEntry =
+  | { id: string; role: 'user'; text: string }
+  | { id: string; role: 'assistant'; text: string; showWhatsapp?: boolean; whatsappPrefill?: string };
+
+const INITIAL_MESSAGES: ChatEntry[] = [
+  { id: 'welcome', role: 'assistant', text: 'Qual é a sua dúvida?' },
+];
+
+function newId(): string {
+  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
+  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
+}
+
 export function ChatLauncher() {
   const { whatsappPhone } = usePublicSiteSettings();
   const reduceMotion = useReducedMotion();
@@ -18,13 +27,24 @@ export function ChatLauncher() {
   const panelId = useId();
 
   const [open, setOpen] = useState(false);
+  const [messages, setMessages] = useState<ChatEntry[]>(INITIAL_MESSAGES);
+  const [draft, setDraft] = useState('');
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
+  const scrollRef = useRef<HTMLDivElement | null>(null);
+  const inputRef = useRef<HTMLInputElement | null>(null);
 
-  const whatsappHref = useMemo(() => {
-    if (!whatsappPhone) return '';
-    return `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(WHATSAPP_INTRO)}`;
-  }, [whatsappPhone]);
+  const whatsappHrefFor = useMemo(
+    () => (extraUserLine?: string) => {
+      if (!whatsappPhone) return '';
+      const body =
+        extraUserLine && extraUserLine.trim().length > 0
+          ? `${WHATSAPP_INTRO}\n\nMinha dúvida: ${extraUserLine.trim()}`
+          : WHATSAPP_INTRO;
+      return `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(body)}`;
+    },
+    [whatsappPhone]
+  );
 
   useEffect(() => {
     if (typeof window === 'undefined') return;
@@ -32,6 +52,12 @@ export function ChatLauncher() {
     window.addEventListener('lancurie:open-chat', handle);
     return () => window.removeEventListener('lancurie:open-chat', handle);
   }, []);
+
+  useLayoutEffect(() => {
+    if (!open) return;
+    setMessages(INITIAL_MESSAGES.map((m) => ({ ...m })));
+    setDraft('');
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -47,6 +73,41 @@ export function ChatLauncher() {
     return () => window.removeEventListener('keydown', onKey);
   }, [open]);
 
+  useEffect(() => {
+    if (!open) return;
+    const el = scrollRef.current;
+    if (!el) return;
+    el.scrollTo({
+      top: el.scrollHeight,
+      behavior: reduceMotion ? 'auto' : 'smooth',
+    });
+  }, [messages, open, reduceMotion]);
+
+  useEffect(() => {
+    if (!open) return;
+    const t = window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 120);
+    return () => window.clearTimeout(t);
+  }, [open]);
+
+  function sendMessage() {
+    const text = draft.trim();
+    if (!text) return;
+
+    const userLine = text;
+    setDraft('');
+    setMessages((prev) => [
+      ...prev,
+      { id: newId(), role: 'user', text: userLine },
+      {
+        id: newId(),
+        role: 'assistant',
+        text: 'Entre em contato pelo nosso WhatsApp.',
+        showWhatsapp: true,
+        whatsappPrefill: userLine,
+      },
+    ]);
+  }
+
   if (!whatsappPhone) return null;
 
   return (
@@ -54,46 +115,39 @@ export function ChatLauncher() {
       className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-end px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:pb-6"
       aria-live="polite"
     >
-      <div className="pointer-events-auto relative flex w-full max-w-88 flex-col items-end gap-3">
+      <div className="pointer-events-auto relative flex w-full max-w-[min(100%,20rem)] flex-col items-end gap-2.5 sm:max-w-88">
         <AnimatePresence initial={false}>
           {open ? (
             <motion.div
               key="chat-panel"
               id={panelId}
               role="dialog"
-              aria-modal="false"
+              aria-modal="true"
               aria-label="Chat Lancurie"
               initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
               animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
               exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.97 }}
               transition={{ duration: reduceMotion ? 0.18 : 0.32, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
-                'relative w-full overflow-hidden rounded-2xl border border-white/10 bg-[#0b1220]/95 backdrop-blur-xl',
-                'shadow-[0_28px_64px_-24px_rgba(2,6,15,0.85),0_8px_22px_-12px_rgba(34,211,238,0.18)]'
+                'relative flex min-h-[16.75rem] max-h-[min(26rem,62vh)] w-full flex-col overflow-hidden rounded-xl border border-zinc-700/70 bg-[#12131a] text-[13px] leading-snug antialiased shadow-[0_24px_56px_-20px_rgba(0,0,0,0.82)] sm:min-h-[17.5rem]'
               )}
             >
-              <div className="pointer-events-none absolute inset-x-0 top-0 h-px bg-linear-to-r from-transparent via-white/15 to-transparent" />
-              <div
-                className="pointer-events-none absolute -right-12 -top-14 h-36 w-36 rounded-full bg-cyan-400/15 blur-3xl"
-                aria-hidden
-              />
-
-              <header className="flex items-start justify-between gap-3 px-4 pb-3 pt-4 sm:px-5">
-                <div className="flex items-center gap-3">
-                  <span className="flex h-10 w-10 shrink-0 items-center justify-center rounded-full border border-white/10 bg-black p-1 shadow-inner">
+              <header className="flex shrink-0 items-center justify-between gap-3 border-b border-zinc-800/90 px-3 py-2.5 sm:px-4">
+                <div className="flex min-w-0 items-center gap-2.5">
+                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/8 bg-zinc-950 p-0.5">
                     {avatarSrc ? (
-                      <img
-                        src={avatarSrc}
-                        alt=""
-                        className="h-8 w-8 rounded-full object-cover"
-                      />
+                      <img src={avatarSrc} alt="" className="h-7 w-7 rounded-full object-cover" />
                     ) : (
-                      <MessageCircle className="h-4.5 w-4.5 text-cyan-200" strokeWidth={1.6} aria-hidden />
+                      <MessageCircle className="h-3.5 w-3.5 text-zinc-400" strokeWidth={1.75} aria-hidden />
                     )}
                   </span>
                   <div className="min-w-0">
-                    <p className="font-display text-[0.95rem] leading-tight text-zinc-100">Lancurie</p>
-                    <p className="text-[0.7rem] uppercase tracking-[0.16em] text-zinc-500">Atendimento</p>
+                    <p className="text-[0.8125rem] font-semibold leading-none tracking-tight text-zinc-100">
+                      Lancurie
+                    </p>
+                    <p className="mt-0.5 text-[0.625rem] font-medium uppercase tracking-[0.14em] text-zinc-500">
+                      Assistente
+                    </p>
                   </div>
                 </div>
                 <button
@@ -104,43 +158,97 @@ export function ChatLauncher() {
                     buttonRef.current?.focus();
                   }}
                   aria-label="Fechar chat"
-                  className="-m-1 rounded-full p-1.5 text-zinc-400 transition-colors hover:bg-white/5 hover:text-zinc-100 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-400/60"
+                  className="-m-0.5 rounded-full p-1 text-zinc-500 transition-colors hover:bg-white/4 hover:text-zinc-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-400/50"
                 >
-                  <X className="h-4 w-4" strokeWidth={1.8} aria-hidden />
+                  <X className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
                 </button>
               </header>
 
-              <div className="space-y-3 px-4 pb-4 sm:px-5">
-                <div className="rounded-2xl rounded-tl-md border border-white/5 bg-white/5 px-3.5 py-3 text-[0.86rem] leading-relaxed text-zinc-200/95">
-                  Olá! Por aqui o atendimento acontece via WhatsApp — toque no botão para conversarmos em tempo real.
-                </div>
-
-                <a
-                  href={whatsappHref}
-                  target="_blank"
-                  rel="noreferrer"
-                  onClick={() => setOpen(false)}
-                  className={cn(
-                    'group flex items-center justify-center gap-2 rounded-xl border border-emerald-400/30 bg-emerald-500/15 px-4 py-3 text-sm font-medium text-emerald-100 transition-all duration-300',
-                    'hover:-translate-y-0.5 hover:border-emerald-300/60 hover:bg-emerald-500/25 hover:shadow-[0_18px_40px_-18px_rgba(16,185,129,0.55)]',
-                    'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-300/70'
-                  )}
-                >
-                  <MessageCircle className="h-4 w-4" strokeWidth={1.8} aria-hidden />
-                  <span>Falar pelo WhatsApp</span>
-                  <span
-                    className="ml-1 text-emerald-200/80 transition-transform group-hover:translate-x-0.5"
-                    aria-hidden
+              <div
+                ref={scrollRef}
+                className="min-h-0 flex-1 space-y-2 overflow-y-auto px-3 pb-5 pt-3 sm:px-3.5 sm:pb-6 [scrollbar-width:thin]"
+                role="log"
+                aria-label="Mensagens da conversa"
+              >
+                {messages.map((msg) => (
+                  <div
+                    key={msg.id}
+                    className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}
                   >
-                    →
-                  </span>
-                </a>
-
-                <p className="flex items-center gap-1.5 text-[0.68rem] leading-relaxed text-zinc-500">
-                  <Sparkles className="h-3 w-3 text-cyan-300/80" strokeWidth={1.8} aria-hidden />
-                  Em breve: copiloto Lancurie para tirar dúvidas e iniciar projetos por aqui.
-                </p>
+                    {msg.role === 'user' ? (
+                      <div
+                        className={cn(
+                          'max-w-[min(100%,88%)] rounded-[14px] rounded-br-[4px] border border-zinc-600/35',
+                          'bg-zinc-800/55 px-2.5 py-2 text-[13px] leading-[1.45] text-zinc-100'
+                        )}
+                      >
+                        {msg.text}
+                      </div>
+                    ) : (
+                      <div
+                        className={cn(
+                          'max-w-[min(100%,92%)] rounded-[14px] rounded-bl-[4px] border border-zinc-700/55',
+                          'bg-zinc-900/65 px-2.5 py-2 text-[13px] leading-[1.45] text-zinc-200'
+                        )}
+                      >
+                        <p className="font-normal">{msg.text}</p>
+                        {msg.showWhatsapp ? (
+                          <a
+                            href={whatsappHrefFor(msg.whatsappPrefill)}
+                            target="_blank"
+                            rel="noreferrer"
+                            onClick={() => setOpen(false)}
+                            className={cn(
+                              'mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-600/35',
+                              'bg-emerald-700/85 px-2.5 py-1.5 text-[11px] font-medium text-emerald-50 transition-colors',
+                              'hover:bg-emerald-600 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-400/45'
+                            )}
+                          >
+                            <MessageCircle className="h-3 w-3 shrink-0 opacity-95" strokeWidth={2} aria-hidden />
+                            <span>Abrir WhatsApp</span>
+                          </a>
+                        ) : null}
+                      </div>
+                    )}
+                  </div>
+                ))}
               </div>
+
+              <form
+                className="shrink-0 border-t border-zinc-800/90 bg-[#0e0f14] px-3 pb-2.5 pt-2 sm:px-3.5 sm:pb-3"
+                onSubmit={(e) => {
+                  e.preventDefault();
+                  sendMessage();
+                }}
+              >
+                <div className="flex items-end gap-1.5">
+                  <input
+                    ref={inputRef}
+                    type="text"
+                    value={draft}
+                    onChange={(e) => setDraft(e.target.value)}
+                    placeholder="Escreva sua mensagem…"
+                    autoComplete="off"
+                    aria-label="Sua mensagem"
+                    className={cn(
+                      'min-h-9 flex-1 rounded-lg border border-zinc-700/65 bg-zinc-900/80 px-2.5 py-2 text-[13px] text-zinc-100',
+                      'placeholder:text-zinc-600 focus-visible:border-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-cyan-500/25'
+                    )}
+                  />
+                  <button
+                    type="submit"
+                    aria-label="Enviar mensagem"
+                    disabled={!draft.trim()}
+                    className={cn(
+                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-700 text-white transition-colors',
+                      'hover:bg-emerald-600 disabled:pointer-events-none disabled:opacity-35',
+                      'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-400/40'
+                    )}
+                  >
+                    <Send className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
+                  </button>
+                </div>
+              </form>
             </motion.div>
           ) : null}
         </AnimatePresence>
