@@ -19,14 +19,12 @@ export function MarketingSubHeader() {
       const processLabel = p.nav.process.trim() || p.nav.approach.trim() || 'Processo';
       const servicesLabel = p.nav.services.trim() || 'Serviços';
       const proofLabel = p.nav.proof.trim() || 'Destaques';
-      const contactLabel = p.nav.contact.trim() || 'Contato';
 
       return [
         { section: 'home' as const, to: '/#hero', label: homeLabel },
         { section: 'approach' as const, to: '/#approach', label: processLabel },
         { section: 'services' as const, to: '/#servicos', label: servicesLabel },
         { section: 'proof' as const, to: '/#prova', label: proofLabel },
-        { section: 'contact' as const, to: '/#contact', label: contactLabel },
       ] as { section: HomeSection; to: string; label: string }[];
     },
     [p.nav]

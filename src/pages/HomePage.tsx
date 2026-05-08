@@ -1,12 +1,10 @@
 import { useEffect, useLayoutEffect } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useSiteCopy } from '@/contexts/useSiteCopy';
-import { usePublicSiteSettings } from '@/contexts/usePublicSiteSettings';
 import { HomePageView } from '@/pages/HomePageView';
 
 export function HomePage() {
   const { doc, ready: siteImageReady } = useSiteCopy();
-  const { contactEmail, whatsappPhone } = usePublicSiteSettings();
   const { hash, pathname } = useLocation();
 
   useLayoutEffect(() => {
@@ -28,8 +26,6 @@ export function HomePage() {
 
   return (
     <HomePageView
-      contactEmail={contactEmail}
-      whatsappPhone={whatsappPhone}
       siteImageOverrides={doc?.images}
       siteImageReady={siteImageReady}
     />

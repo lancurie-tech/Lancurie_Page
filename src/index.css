@@ -250,3 +250,15 @@ html[data-theme='dark'] .lancurie-hero-dots {
     opacity: 0.5;
   }
 }
+
+/* Autofill em superfícies escuras — manter contraste sem o azul claro do Chrome */
+.lancurie-dark-input:-webkit-autofill,
+.lancurie-dark-input:-webkit-autofill:hover,
+.lancurie-dark-input:-webkit-autofill:focus,
+.lancurie-dark-input:-webkit-autofill:active {
+  -webkit-text-fill-color: #f4f4f5;
+  caret-color: #f4f4f5;
+  -webkit-box-shadow: 0 0 0 1000px rgb(24 24 27 / 0.92) inset;
+  box-shadow: 0 0 0 1000px rgb(24 24 27 / 0.92) inset;
+  transition: background-color 9999s ease-in-out 0s;
+}

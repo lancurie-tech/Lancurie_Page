@@ -90,11 +90,11 @@ export function AdminLoginPage() {
           </p>
         ) : null}
 
-        <form className="mt-8 space-y-4" onSubmit={onSubmit}>
-          <div>
+        <form className="mt-8 space-y-5" onSubmit={onSubmit}>
+          <div className="space-y-2">
             <label
               htmlFor="login-email"
-              className="block text-xs font-semibold tracking-[0.08em] text-zinc-300"
+              className="block text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-zinc-200"
             >
               {p.login.emailLabel || 'Email'}
             </label>
@@ -102,17 +102,17 @@ export function AdminLoginPage() {
               id="login-email"
               type="email"
               autoComplete="username"
-              placeholder={p.login.emailLabel || 'Email'}
+              placeholder="seu@email.com"
               value={email}
               onChange={(ev) => setEmail(ev.target.value)}
               required
-              className="mt-1.5 w-full rounded-lg border border-zinc-700 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-100 outline-none ring-emerald-500/40 focus:ring-2"
+              className="lancurie-dark-input w-full rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-500/40"
             />
           </div>
-          <div>
+          <div className="space-y-2">
             <label
               htmlFor="login-password"
-              className="block text-xs font-semibold tracking-[0.08em] text-zinc-300"
+              className="block text-[0.72rem] font-semibold uppercase tracking-[0.16em] text-zinc-200"
             >
               {p.login.passwordLabel || 'Senha'}
             </label>
@@ -120,11 +120,11 @@ export function AdminLoginPage() {
               id="login-password"
               type="password"
               autoComplete="current-password"
-              placeholder={p.login.passwordLabel || 'Senha'}
+              placeholder="••••••••"
               value={password}
               onChange={(ev) => setPassword(ev.target.value)}
               required
-              className="mt-1.5 w-full rounded-lg border border-zinc-700 bg-zinc-900/50 px-3 py-2 text-sm text-zinc-100 outline-none ring-emerald-500/40 focus:ring-2"
+              className="lancurie-dark-input w-full rounded-lg border border-zinc-700 bg-zinc-900/60 px-3 py-2.5 text-sm text-zinc-100 placeholder:text-zinc-500 outline-none transition-colors focus:border-emerald-400/60 focus:ring-2 focus:ring-emerald-500/40"
             />
           </div>
           {displayError ? (
@@ -135,9 +135,9 @@ export function AdminLoginPage() {
           <button
             type="submit"
             disabled={busy || awaitingSession}
-            className="w-full rounded-lg bg-zinc-100 py-2.5 text-sm font-semibold text-zinc-900 transition-opacity disabled:opacity-60"
+            className="w-full rounded-lg bg-zinc-100 py-2.5 text-sm font-semibold text-zinc-900 transition-opacity hover:bg-white disabled:opacity-60"
           >
-            {busy || awaitingSession ? 'A entrar…' : p.login.submit}
+            {busy || awaitingSession ? 'A entrar…' : p.login.submit?.trim() || 'Entrar'}
           </button>
         </form>
       </div>

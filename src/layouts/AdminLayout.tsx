@@ -1,4 +1,4 @@
-import { LogOut, FileText, Home, Menu, MessagesSquare } from 'lucide-react';
+import { BarChart3, LogOut, FileText, Home, Menu } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { NavLink, Outlet, Link, useNavigate, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/useAuth';
@@ -98,7 +98,7 @@ function AdminHeader({ adminLogo }: { adminLogo: string | null }) {
               <FileText className="h-[1.05rem] w-[1.05rem]" strokeWidth={2} aria-hidden />
             </NavLink>
             <NavLink
-              to="/admin/contatos"
+              to="/admin/acessos"
               className={({ isActive }) =>
                 cn(
                   'rounded-full p-2 transition-colors',
@@ -107,10 +107,10 @@ function AdminHeader({ adminLogo }: { adminLogo: string | null }) {
                     : 'text-zinc-400 hover:bg-zinc-800/70 hover:text-zinc-100'
                 )
               }
-              aria-label="Pedidos de contato"
-              title="Pedidos de contato"
+              aria-label="Acessos ao site"
+              title="Acessos ao site"
             >
-              <MessagesSquare className="h-[1.05rem] w-[1.05rem]" strokeWidth={2} aria-hidden />
+              <BarChart3 className="h-[1.05rem] w-[1.05rem]" strokeWidth={2} aria-hidden />
             </NavLink>
             <button
               type="button"
@@ -155,12 +155,12 @@ function AdminHeader({ adminLogo }: { adminLogo: string | null }) {
                     <FileText className="h-4.5 w-4.5" strokeWidth={2} aria-hidden />
                   </Link>
                   <Link
-                    to="/admin/contatos"
+                    to="/admin/acessos"
                     className="rounded-lg p-2 text-zinc-300 transition-colors hover:bg-zinc-800/80 hover:text-zinc-100"
-                    aria-label="Pedidos de contato"
-                    title="Pedidos de contato"
+                    aria-label="Acessos ao site"
+                    title="Acessos ao site"
                   >
-                    <MessagesSquare className="h-4.5 w-4.5" strokeWidth={2} aria-hidden />
+                    <BarChart3 className="h-4.5 w-4.5" strokeWidth={2} aria-hidden />
                   </Link>
                   <button
                     type="button"

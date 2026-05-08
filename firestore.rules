@@ -42,6 +42,16 @@ service cloud.firestore {
       allow create, update, delete: if isAdmin();
     }
 
+    match /siteVisits/{visitId} {
+      allow create: if request.resource.data.keys().hasOnly(['path', 'createdAt'])
+        && request.resource.data.path is string
+        && request.resource.data.path.size() >= 1
+        && request.resource.data.path.size() <= 400
+        && request.resource.data.createdAt == request.time;
+      allow read: if isAdmin();
+      allow update, delete: if false;
+    }
+
     match /contactRequests/{requestId} {
       allow create: if request.resource.data.keys().hasOnly([
         'name',

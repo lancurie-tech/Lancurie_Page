@@ -1,18 +1,9 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, type PanInfo, useReducedMotion } from 'framer-motion';
-import {
-  Activity,
-  ChevronDown,
-  Mail,
-  MessageCircle,
-  SendHorizontal,
-  Scissors,
-  Store,
-} from 'lucide-react';
+import { Activity, ChevronDown, Scissors, Store } from 'lucide-react';
 import { ServicesStack } from '@/components/home/ServicesStack';
 import { fadeUpVariants, staggerContainerVariants, viewportOnce } from '@/components/home/homeMotion';
 import { NeuralNoise } from '@/components/ui/neural-noise';
-import { useContactDrawer } from '@/contexts/useContactDrawer';
 import type { SiteImageKey } from '@/data/siteImageConfig';
 import { useI18n } from '@/i18n/useI18n';
 import { cn } from '@/lib/cn';
@@ -25,9 +16,6 @@ const PROOF_ICONS = [Activity, Store, Scissors] as const;
 export type HomePageViewProps = {
   /** Só usado no admin: pré-visualização sem alterar o contexto global. */
   publicTextOverride?: PublicPageText;
-  contactEmail: string;
-  /** Dígitos com indicativo para wa.me */
-  whatsappPhone?: string;
   /** URLs de imagem definidas no admin (sobrepor aos valores por defeito). */
   siteImageOverrides?: Partial<Record<SiteImageKey, string>> | null;
   /** Falso até à primeira leitura do `siteCopy` (evita flash de imagens antigas do bundle). */
@@ -36,8 +24,6 @@ export type HomePageViewProps = {
 
 export function HomePageView({
   publicTextOverride,
-  contactEmail,
-  whatsappPhone = '',
   siteImageOverrides,
   siteImageReady = true,
 }: HomePageViewProps) {
@@ -91,7 +77,6 @@ export function HomePageView({
   type PaletteTone = 'cool' | 'warm';
   const { publicText: ctxP } = useI18n();
   const p = publicTextOverride ?? ctxP;
-  const { open: openContact } = useContactDrawer();
   const reduceMotion = useReducedMotion();
   const img = (key: SiteImageKey) =>
     siteImageReady ? resolveSiteImage(key, siteImageOverrides) : '';
@@ -264,10 +249,6 @@ export function HomePageView({
 
   const isWarm = paletteTone === 'warm';
   const useLightHeroEffects = reduceMotion || isMobileViewport;
-  const whatsappIntroText = 'Olá, gostaria de saber mais sobre seus serviços!';
-  const whatsappDirectHref = whatsappPhone
-    ? `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(whatsappIntroText)}`
-    : '';
 
   const scrollHint = (
     <a
@@ -646,7 +627,10 @@ export function HomePageView({
             ctaLabel={p.services.cta}
             accentTone={paletteTone}
             emptyMessage={<p className="text-sm leading-relaxed text-zinc-400">{p.services.empty}</p>}
-            onEmptyCta={() => openContact({ origin: 'services-empty' })}
+            onEmptyCta={() => {
+              if (typeof window === 'undefined') return;
+              window.dispatchEvent(new CustomEvent('lancurie:open-chat'));
+            }}
             emptyCtaLabel={p.hero.ctaPrimary}
           />
         </div>
@@ -763,89 +747,6 @@ export function HomePageView({
         </div>
       </section>
 
-      <section
-        id="contact"
-        className="relative z-1 scroll-mt-24 bg-[linear-gradient(180deg,#0d1321_0%,#0c1422_22%,#10192c_55%,#121b2f_100%)] py-12 sm:py-20 lg:py-24"
-      >
-        <div className="mx-auto max-w-6xl px-4 sm:px-8 lg:px-12">
-          <div className="grid gap-8 lg:gap-12">
-            <motion.div
-              className="max-w-2xl text-center sm:text-left"
-              variants={staggerApproach}
-              initial="hidden"
-              whileInView="visible"
-              viewport={viewportOnce}
-            >
-              <motion.h2
-                variants={fadeUp}
-                className="text-balance font-display text-[1.7rem] font-normal leading-tight tracking-tight text-zinc-50 sm:text-3xl md:text-[2.15rem]"
-              >
-                {p.contact.title}
-              </motion.h2>
-              <motion.p
-                variants={fadeUp}
-                className="mt-4 text-pretty text-[1.02rem] leading-relaxed text-zinc-300/95 sm:mt-6 sm:text-base"
-              >
-                {p.contact.lead}
-              </motion.p>
-            </motion.div>
-
-            <motion.div
-              className="max-w-4xl rounded-2xl border border-zinc-700/35 bg-zinc-950/18 p-4 ring-1 ring-inset ring-white/5 sm:p-6 lg:p-7"
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={viewportOnce}
-            >
-              <div className="flex flex-col items-center gap-3 sm:flex-row sm:items-center sm:justify-start sm:gap-6">
-                {whatsappPhone ? (
-                  <a
-                    href={whatsappDirectHref}
-                    target="_blank"
-                    rel="noreferrer"
-                    className={cn(
-                      'group inline-flex items-center gap-2.5 rounded-full border border-zinc-600/45 bg-zinc-950/40 px-4 py-2 text-zinc-100 transition-all duration-300',
-                      isWarm
-                        ? 'hover:border-orange-300/55 hover:bg-orange-500/12 hover:text-orange-100'
-                        : 'hover:border-cyan-300/55 hover:bg-cyan-500/10 hover:text-cyan-100'
-                    )}
-                  >
-                    <MessageCircle className="h-4.5 w-4.5 lg:h-5 lg:w-5" aria-hidden />
-                    <span className="text-sm font-semibold tracking-wide lg:text-base">WhatsApp</span>
-                  </a>
-                ) : null}
-
-                <a
-                  href={`mailto:${contactEmail}`}
-                  className={cn(
-                    'group inline-flex items-center gap-2.5 rounded-full border border-zinc-600/45 bg-zinc-950/40 px-4 py-2 text-zinc-100 transition-all duration-300',
-                    isWarm
-                      ? 'hover:border-orange-300/55 hover:bg-orange-500/12 hover:text-orange-100'
-                      : 'hover:border-cyan-300/55 hover:bg-cyan-500/10 hover:text-cyan-100'
-                  )}
-                >
-                  <Mail className="h-4.5 w-4.5 lg:h-5 lg:w-5" aria-hidden />
-                  <span className="text-sm font-semibold tracking-wide lg:text-base">Email</span>
-                </a>
-              </div>
-
-              <button
-                type="button"
-                onClick={() => openContact({ origin: 'contact-section' })}
-                className={cn(
-                  'mt-5 inline-flex w-full items-center justify-center gap-2.5 rounded-full border border-zinc-500/45 bg-zinc-950/45 px-5 py-2.5 text-center text-sm font-medium text-zinc-200 transition-all duration-300 sm:mt-6 sm:w-auto sm:justify-start sm:px-4 sm:py-2.5 lg:text-base',
-                  isWarm
-                    ? 'hover:border-orange-300/55 hover:bg-orange-500/12 hover:text-orange-100'
-                    : 'hover:border-cyan-300/55 hover:bg-cyan-500/10 hover:text-cyan-100'
-                )}
-              >
-                <SendHorizontal className="h-4.5 w-4.5 lg:h-5 lg:w-5" aria-hidden />
-                <span>Descreva sua dor que entraremos em contato</span>
-              </button>
-            </motion.div>
-          </div>
-        </div>
-      </section>
       </div>
     </main>
   );

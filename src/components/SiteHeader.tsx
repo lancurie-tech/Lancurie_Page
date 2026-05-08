@@ -1,4 +1,4 @@
-import { ArrowLeft, FileText, Home, LogOut, Menu, MessagesSquare } from 'lucide-react';
+import { ArrowLeft, BarChart3, FileText, Home, LogOut, Menu } from 'lucide-react';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useLocation } from 'react-router-dom';
 import { useAuth } from '@/contexts/useAuth';
@@ -111,12 +111,12 @@ export function SiteHeader() {
                   <FileText className="h-[1.05rem] w-[1.05rem]" strokeWidth={2} aria-hidden />
                 </Link>
                 <Link
-                  to="/admin/contatos"
+                  to="/admin/acessos"
                   className="rounded-full p-2 text-zinc-400 transition-colors hover:bg-zinc-800/70 hover:text-zinc-100"
-                  aria-label="Pedidos de contato"
-                  title="Pedidos de contato"
+                  aria-label="Acessos ao site"
+                  title="Acessos ao site"
                 >
-                  <MessagesSquare className="h-[1.05rem] w-[1.05rem]" strokeWidth={2} aria-hidden />
+                  <BarChart3 className="h-[1.05rem] w-[1.05rem]" strokeWidth={2} aria-hidden />
                 </Link>
                 <button
                   type="button"
@@ -163,13 +163,13 @@ export function SiteHeader() {
                         <FileText className="h-4.5 w-4.5" strokeWidth={2} aria-hidden />
                       </Link>
                       <Link
-                        to="/admin/contatos"
+                        to="/admin/acessos"
                         onClick={() => setAdminMenuOpen(false)}
                         className="rounded-lg p-2 text-zinc-300 transition-colors hover:bg-zinc-800/80 hover:text-zinc-100"
-                        aria-label="Pedidos de contato"
-                        title="Pedidos de contato"
+                        aria-label="Acessos ao site"
+                        title="Acessos ao site"
                       >
-                        <MessagesSquare className="h-4.5 w-4.5" strokeWidth={2} aria-hidden />
+                        <BarChart3 className="h-4.5 w-4.5" strokeWidth={2} aria-hidden />
                       </Link>
                       <button
                         type="button"

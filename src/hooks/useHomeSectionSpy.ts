@@ -5,8 +5,7 @@ export type HomeSection =
   | 'home'
   | 'proof'
   | 'services'
-  | 'approach'
-  | 'contact';
+  | 'approach';
 
 const order: { id: string; section: HomeSection }[] = [
   { id: 'hero', section: 'home' },
@@ -14,7 +13,6 @@ const order: { id: string; section: HomeSection }[] = [
   { id: 'approach', section: 'approach' },
   { id: 'servicos', section: 'services' },
   { id: 'prova', section: 'proof' },
-  { id: 'contact', section: 'contact' },
 ];
 
 /**

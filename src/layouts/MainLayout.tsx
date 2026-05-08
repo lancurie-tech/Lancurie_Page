@@ -1,4 +1,6 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { SiteVisitTracker } from '@/components/analytics/SiteVisitTracker';
+import { ChatLauncher } from '@/components/chat/ChatLauncher';
 import { MarketingSubHeader } from '@/components/MarketingSubHeader';
 import { ScrollToTop } from '@/components/ScrollToTop';
 import { SiteFooter } from '@/components/SiteFooter';
@@ -14,6 +16,7 @@ export function MainLayout() {
       className="relative flex min-h-screen flex-col bg-[radial-gradient(ellipse_120%_100%_at_50%_-8%,#222531_0%,#1b1d27_38%,#1b1d27_100%)] text-zinc-50 antialiased"
     >
       <ScrollToTop />
+      <SiteVisitTracker />
       {/* Vignette lateral (só ecrãs largos): escurece as bordas sem alterar o layout do conteúdo central. */}
       <div
         className="pointer-events-none fixed inset-0 z-5 hidden bg-[linear-gradient(to_right,rgba(0,0,0,0.28)_0%,transparent_14%,transparent_86%,rgba(0,0,0,0.28)_100%)] xl:block 2xl:bg-[linear-gradient(to_right,rgba(0,0,0,0.38)_0%,transparent_12%,transparent_88%,rgba(0,0,0,0.38)_100%)] min-[1920px]:bg-[linear-gradient(to_right,rgba(0,0,0,0.48)_0%,transparent_10%,transparent_90%,rgba(0,0,0,0.48)_100%)]"
@@ -26,6 +29,7 @@ export function MainLayout() {
       </div>
       <Outlet />
       <SiteFooter />
+      <ChatLauncher />
     </div>
   );
 }
