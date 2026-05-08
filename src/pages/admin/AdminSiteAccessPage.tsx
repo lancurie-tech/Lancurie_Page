@@ -1,11 +1,12 @@
 import { useEffect, useMemo, useState } from 'react';
+import { WorldAccessMap } from '@/components/analytics/WorldAccessMap';
 import { formatSaoPauloDayKey } from '@/lib/date/saoPauloDayKey';
 import { subscribeSiteVisitsSince } from '@/lib/firestore/siteVisits';
 import type { SiteVisit } from '@/types/siteVisit';
 
-const RANGE_DAYS = 30;
-const CHART_DAYS = 14;
-const RECENT_ROWS = 40;
+const FETCH_RANGE_DAYS = 90;
+const RANGE_OPTIONS = [7, 15, 30, 90] as const;
+type RangeOption = (typeof RANGE_OPTIONS)[number];
 
 function tsToDate(value: SiteVisit['createdAt']): Date | null {
   if (!value || typeof value !== 'object' || typeof value.toDate !== 'function') return null;
@@ -16,11 +17,10 @@ function tsToDate(value: SiteVisit['createdAt']): Date | null {
   }
 }
 
-function chartDayKeys(): string[] {
+function chartDayKeys(days: number, nowMs: number): string[] {
   const keys: string[] = [];
-  const now = Date.now();
-  for (let i = CHART_DAYS - 1; i >= 0; i--) {
-    const dt = new Date(now - i * 24 * 60 * 60 * 1000);
+  for (let i = days - 1; i >= 0; i--) {
+    const dt = new Date(nowMs - i * 24 * 60 * 60 * 1000);
     keys.push(formatSaoPauloDayKey(dt));
   }
   return keys;
@@ -42,11 +42,13 @@ function formatDayPt(dayKey: string): string {
 export function AdminSiteAccessPage() {
   const [items, setItems] = useState<SiteVisit[]>([]);
   const [banner, setBanner] = useState<{ type: 'err'; text: string } | null>(null);
+  const [selectedRangeDays, setSelectedRangeDays] = useState<RangeOption>(7);
+  const [nowMs, setNowMs] = useState<number>(() => Date.now());
 
   useEffect(() => {
     const since = new Date();
     since.setHours(0, 0, 0, 0);
-    since.setDate(since.getDate() - RANGE_DAYS);
+    since.setDate(since.getDate() - FETCH_RANGE_DAYS);
     return subscribeSiteVisitsSince(
       since,
       setItems,
@@ -54,22 +56,36 @@ export function AdminSiteAccessPage() {
     );
   }, []);
 
+  useEffect(() => {
+    const timer = window.setInterval(() => setNowMs(Date.now()), 60_000);
+    return () => window.clearInterval(timer);
+  }, []);
+
+  const filteredItems = useMemo(() => {
+    const minTs = nowMs - selectedRangeDays * 24 * 60 * 60 * 1000;
+    return items.filter((v) => {
+      const dt = tsToDate(v.createdAt);
+      if (!dt) return false;
+      return dt.getTime() >= minTs;
+    });
+  }, [items, selectedRangeDays, nowMs]);
+
   const byDay = useMemo(() => {
     const map = new Map<string, number>();
-    for (const v of items) {
+    for (const v of filteredItems) {
       const dt = tsToDate(v.createdAt);
       if (!dt) continue;
       const key = formatSaoPauloDayKey(dt);
       map.set(key, (map.get(key) ?? 0) + 1);
     }
     return map;
-  }, [items]);
+  }, [filteredItems]);
 
   const stats = useMemo(() => {
-    const todayKeyNow = formatSaoPauloDayKey(new Date());
-    const total = items.length;
+    const todayKeyNow = formatSaoPauloDayKey(new Date(nowMs));
+    const total = filteredItems.length;
     const today = byDay.get(todayKeyNow) ?? 0;
-    const avgPerDay = total === 0 ? 0 : Math.round((total / RANGE_DAYS) * 10) / 10;
+    const avgPerDay = total === 0 ? 0 : Math.round((total / selectedRangeDays) * 10) / 10;
     let peakDay = '';
     let peakCount = 0;
     for (const [day, n] of byDay) {
@@ -79,9 +95,9 @@ export function AdminSiteAccessPage() {
       }
     }
     return { total, today, avgPerDay, peakDay, peakCount };
-  }, [items, byDay]);
+  }, [filteredItems, byDay, selectedRangeDays, nowMs]);
 
-  const chartKeys = useMemo(() => chartDayKeys(), []);
+  const chartKeys = useMemo(() => chartDayKeys(selectedRangeDays, nowMs), [selectedRangeDays, nowMs]);
   const chartMax = useMemo(() => {
     let m = 1;
     for (const k of chartKeys) {
@@ -90,21 +106,68 @@ export function AdminSiteAccessPage() {
     return m;
   }, [chartKeys, byDay]);
 
-  const todayKey = formatSaoPauloDayKey(new Date());
+  const todayKey = formatSaoPauloDayKey(new Date(nowMs));
+
+  const geoPoints = useMemo(() => {
+    const map = new Map<
+      string,
+      {
+        id: string;
+        latitude: number;
+        longitude: number;
+        count: number;
+        city?: string | null;
+        region?: string | null;
+        country?: string | null;
+      }
+    >();
+
+    for (const v of filteredItems) {
+      const geo = v.geo;
+      if (!geo) continue;
+      if (
+        typeof geo.latitude !== 'number' ||
+        typeof geo.longitude !== 'number' ||
+        Number.isNaN(geo.latitude) ||
+        Number.isNaN(geo.longitude)
+      ) {
+        continue;
+      }
+      const key = `${geo.latitude.toFixed(2)}:${geo.longitude.toFixed(2)}`;
+      const prev = map.get(key);
+      if (prev) {
+        prev.count += 1;
+      } else {
+        map.set(key, {
+          id: key,
+          latitude: geo.latitude,
+          longitude: geo.longitude,
+          count: 1,
+          city: geo.city,
+          region: geo.region,
+          country: geo.country,
+        });
+      }
+    }
+
+    return Array.from(map.values()).sort((a, b) => b.count - a.count);
+  }, [filteredItems]);
+
+  const topLocations = useMemo(() => geoPoints.slice(0, 6), [geoPoints]);
 
   return (
     <div className="space-y-8">
       <div>
         <h1 className="font-display text-3xl font-normal tracking-tight text-zinc-50">Acessos ao site</h1>
         <p className="mt-2 max-w-3xl text-sm text-zinc-500">
-          Visualizações de página registadas automaticamente quando alguém navega no site público (últimos{' '}
-          {RANGE_DAYS} dias). Não equivale a visitantes únicos — apenas eventos de navegação.
+          Visitantes únicos por dia registados automaticamente no site público (até {FETCH_RANGE_DAYS} dias). Cada
+          navegador conta no máximo 1 acesso por dia (fuso São Paulo).
         </p>
       </div>
 
       <div className="grid gap-3 sm:grid-cols-2 lg:grid-cols-4">
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
-          <p className="text-xs uppercase tracking-wide text-zinc-500">Total ({RANGE_DAYS} dias)</p>
+          <p className="text-xs uppercase tracking-wide text-zinc-500">Total ({selectedRangeDays} dias)</p>
           <p className="mt-1 text-2xl font-semibold text-zinc-100">{stats.total}</p>
         </div>
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/40 p-4">
@@ -138,11 +201,32 @@ export function AdminSiteAccessPage() {
       ) : null}
 
       <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-4 sm:p-6">
-        <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
-          Últimos {CHART_DAYS} dias (fuso São Paulo)
-        </h2>
+        <div className="flex flex-wrap items-center justify-between gap-3">
+          <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">
+            Últimos {selectedRangeDays} dias (fuso São Paulo)
+          </h2>
+          <div className="inline-flex rounded-lg border border-zinc-700/70 bg-zinc-950/70 p-1">
+            {RANGE_OPTIONS.map((days) => {
+              const active = selectedRangeDays === days;
+              return (
+                <button
+                  key={days}
+                  type="button"
+                  onClick={() => setSelectedRangeDays(days)}
+                  className={
+                    active
+                      ? 'rounded-md bg-cyan-500/25 px-2.5 py-1 text-xs font-medium text-cyan-200'
+                      : 'rounded-md px-2.5 py-1 text-xs font-medium text-zinc-400 transition-colors hover:text-zinc-200'
+                  }
+                >
+                  {days}d
+                </button>
+              );
+            })}
+          </div>
+        </div>
         <div className="mt-6 overflow-x-auto pb-2">
-          <div className="flex min-w-[640px] items-end gap-1.5 sm:min-w-0 sm:gap-2" role="img" aria-label="Gráfico de barras de visualizações por dia">
+          <div className="flex min-w-[640px] items-end gap-1.5 sm:min-w-0 sm:gap-2" role="img" aria-label="Gráfico de barras de acessos únicos por dia">
             {chartKeys.map((key) => {
               const n = byDay.get(key) ?? 0;
               const h = Math.max(8, Math.round((n / chartMax) * 100));
@@ -153,7 +237,7 @@ export function AdminSiteAccessPage() {
                   <div
                     className="flex w-full flex-col justify-end rounded-t-md bg-zinc-950/60"
                     style={{ height: '7rem' }}
-                    title={`${key}: ${n} visualizações`}
+                    title={`${key}: ${n} acessos únicos`}
                   >
                     <div
                       className={
@@ -174,40 +258,33 @@ export function AdminSiteAccessPage() {
         </div>
       </div>
 
-      <div className="overflow-x-auto rounded-2xl border border-zinc-800">
-        <table className="min-w-full divide-y divide-zinc-800 text-left text-sm">
-          <thead className="bg-zinc-950/80 text-xs uppercase tracking-wide text-zinc-500">
-            <tr>
-              <th className="px-4 py-3 font-medium">Data / hora</th>
-              <th className="px-4 py-3 font-medium">Caminho</th>
-            </tr>
-          </thead>
-          <tbody className="divide-y divide-zinc-800/80 bg-zinc-900/20">
-            {items.slice(0, RECENT_ROWS).map((row) => {
-              const dt = tsToDate(row.createdAt);
-              const label = dt
-                ? dt.toLocaleString('pt-BR', { timeZone: 'America/Sao_Paulo' })
-                : '—';
-              return (
-                <tr key={row.id} className="text-zinc-300">
-                  <td className="whitespace-nowrap px-4 py-3 text-xs text-zinc-500">{label}</td>
-                  <td className="px-4 py-3 font-mono text-xs text-zinc-200">{row.path || '/'}</td>
-                </tr>
-              );
-            })}
-            {items.length === 0 ? (
-              <tr>
-                <td colSpan={2} className="px-4 py-10 text-center text-zinc-500">
-                  Ainda não há registros de navegação. Visite o site público com esta versão publicada e as regras do
-                  Firestore atualizadas para começar a acumular dados.
-                </td>
-              </tr>
-            ) : null}
-          </tbody>
-        </table>
+      <div className="space-y-3">
+        <WorldAccessMap points={geoPoints} />
+        <div className="rounded-xl border border-zinc-800 bg-zinc-900/20 p-4">
+          <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Top locais</h3>
+          {topLocations.length > 0 ? (
+            <div className="mt-3 grid gap-2 sm:grid-cols-2 lg:grid-cols-3">
+              {topLocations.map((loc) => {
+                const label =
+                  [loc.city, loc.region, loc.country].filter(Boolean).join(', ') ||
+                  `${loc.latitude.toFixed(2)}, ${loc.longitude.toFixed(2)}`;
+                return (
+                  <div key={loc.id} className="rounded-lg border border-zinc-800 bg-zinc-950/40 px-3 py-2">
+                    <p className="truncate text-sm text-zinc-200">{label}</p>
+                    <p className="mt-0.5 text-xs text-zinc-500">{loc.count} acesso(s)</p>
+                  </div>
+                );
+              })}
+            </div>
+          ) : (
+            <p className="mt-3 text-sm text-zinc-500">
+              Ainda sem dados geograficos. Novos acessos com consentimento aceito vao preencher o mapa.
+            </p>
+          )}
+        </div>
       </div>
 
-      {items.length >= 5000 ? (
+      {filteredItems.length >= 5000 ? (
         <p className="text-xs text-amber-200/90">
           Limite de {5000} eventos mais recentes no período — valores podem estar truncados se o tráfego for muito alto.
         </p>

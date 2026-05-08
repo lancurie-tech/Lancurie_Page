@@ -5,6 +5,7 @@ import { siteDomain } from '@/lib/site';
 import { usePublicSiteSettings } from '@/contexts/usePublicSiteSettings';
 import { useI18n } from '@/i18n/useI18n';
 import { useSiteImageUrl } from '@/hooks/useSiteImage';
+import { clearAnalyticsConsent } from '@/lib/analyticsConsent';
 import { cn } from '@/lib/cn';
 
 export function SiteFooter() {
@@ -79,6 +80,13 @@ export function SiteFooter() {
               © {year} {siteDomain} — {p.footer.rights}
             </p>
             <p className="mt-1.5 text-[0.9rem] leading-relaxed text-zinc-400 sm:mt-2 sm:text-sm">{p.footer.built}</p>
+            <button
+              type="button"
+              onClick={clearAnalyticsConsent}
+              className="mt-2 text-xs font-medium text-cyan-300 underline decoration-cyan-500/50 underline-offset-2 transition-colors hover:text-cyan-200"
+            >
+              Gerenciar cookies
+            </button>
           </div>
         </div>
       </div>
