@@ -1,4 +1,4 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent, type WheelEvent as ReactWheelEvent } from 'react';
+import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
 import createGlobe from 'cobe';
 
 type GeoPoint = {
@@ -224,12 +224,20 @@ export function WorldAccessMap({ points, totalVisits }: WorldAccessMapProps) {
     lastInteractionRef.current = performance.now();
   };
 
-  const onWheel = (event: ReactWheelEvent<HTMLDivElement>) => {
-    event.preventDefault();
-    const delta = event.deltaY > 0 ? -0.05 : 0.05;
-    setScale((prev) => Math.max(0.8, Math.min(1.4, Number((prev + delta).toFixed(2)))));
-    lastInteractionRef.current = performance.now();
-  };
+  useEffect(() => {
+    const host = containerRef.current;
+    if (!host) return;
+
+    const onWheel = (event: WheelEvent) => {
+      event.preventDefault();
+      const delta = event.deltaY > 0 ? -0.05 : 0.05;
+      setScale((prev) => Math.max(0.8, Math.min(1.4, Number((prev + delta).toFixed(2)))));
+      lastInteractionRef.current = performance.now();
+    };
+
+    host.addEventListener('wheel', onWheel, { passive: false });
+    return () => host.removeEventListener('wheel', onWheel);
+  }, []);
 
   return (
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-4 sm:p-6">
@@ -244,7 +252,6 @@ export function WorldAccessMap({ points, totalVisits }: WorldAccessMapProps) {
       <div
         ref={containerRef}
         className="relative mt-4 flex min-h-[320px] items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-[radial-gradient(circle_at_50%_40%,rgba(10,68,122,0.2),rgba(5,8,15,0.95)_65%)]"
-        onWheel={onWheel}
       >
         <canvas
           ref={canvasRef}
