@@ -1,4 +1,5 @@
 import type { SitePublicContent } from '@/types/sitePublicContent';
+import { DEFAULT_PRIVACY_POLICY_PAGE_CONTENT } from '@/data/defaultPrivacyPolicyPageContent';
 
 /**
  * Conteúdo editorial inicial (PT) — referência para subir a `siteCopy` / `publicContent` no Firebase.
@@ -236,6 +237,7 @@ export const INITIAL_SITE_PUBLIC_CONTENT: SitePublicContent = {
     emailUs: 'E-mail comercial',
     socialAria: 'Ligação social (site)',
   },
+  privacyPolicy: DEFAULT_PRIVACY_POLICY_PAGE_CONTENT,
   serviceDetail: {
     back: 'Voltar ao site',
     contactCta: 'Falar deste serviço',

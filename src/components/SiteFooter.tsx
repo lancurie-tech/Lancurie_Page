@@ -80,13 +80,24 @@ export function SiteFooter() {
               © {year} {siteDomain} — {p.footer.rights}
             </p>
             <p className="mt-1.5 text-[0.9rem] leading-relaxed text-zinc-400 sm:mt-2 sm:text-sm">{p.footer.built}</p>
-            <button
-              type="button"
-              onClick={clearAnalyticsConsent}
-              className="mt-2 text-xs font-medium text-cyan-300 underline decoration-cyan-500/50 underline-offset-2 transition-colors hover:text-cyan-200"
+            <nav
+              className="mt-2 flex flex-wrap items-center justify-center gap-x-5 gap-y-2 text-xs font-medium"
+              aria-label="Legal e privacidade"
             >
-              Gerenciar cookies
-            </button>
+              <Link
+                to="/privacidade"
+                className="text-cyan-300 underline decoration-cyan-500/50 underline-offset-2 transition-colors hover:text-cyan-200"
+              >
+                Política de privacidade
+              </Link>
+              <button
+                type="button"
+                onClick={clearAnalyticsConsent}
+                className="text-cyan-300 underline decoration-cyan-500/50 underline-offset-2 transition-colors hover:text-cyan-200"
+              >
+                Gerenciar cookies
+              </button>
+            </nav>
           </div>
         </div>
       </div>

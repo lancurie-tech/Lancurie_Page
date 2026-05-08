@@ -1,5 +1,6 @@
 import type {
   ContactFormFields,
+  PrivacyPolicySectionContent,
   ProofCardContent,
   EngagementCardContent,
   FaqItemContent,
@@ -26,6 +27,8 @@ const product = (id: string): HomeProductContent => ({
   focalX: 50,
   focalY: 50,
 });
+const privacySection = (): PrivacyPolicySectionContent => ({ title: z(), body: z() });
+
 const form = (): ContactFormFields => ({
   name: z(),
   email: z(),
@@ -96,6 +99,23 @@ export function emptySitePublicContent(): SitePublicContent {
       form: form(),
     },
     footer: { rights: z(), built: z(), locationLine: z(), emailUs: z(), socialAria: z() },
+    privacyPolicy: {
+      eyebrow: z(),
+      title: z(),
+      lastUpdatedLine: z(),
+      backLinkLabel: z(),
+      sections: [
+        privacySection(),
+        privacySection(),
+        privacySection(),
+        privacySection(),
+        privacySection(),
+        privacySection(),
+        privacySection(),
+        privacySection(),
+        privacySection(),
+      ],
+    },
     serviceDetail: { back: z(), contactCta: z() },
     welcome: { line: z() },
     marketing: { subnavAria: z() },

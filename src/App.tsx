@@ -16,6 +16,7 @@ import { AdminSiteContentPage } from '@/pages/admin/AdminSiteContentPage';
 import { AdminSiteAccessPage } from '@/pages/admin/AdminSiteAccessPage';
 import { ServicesCatalogPage } from '@/pages/ServicesCatalogPage';
 import { ServiceDetailPage } from '@/pages/ServiceDetailPage';
+import { PrivacyPolicyPage } from '@/pages/PrivacyPolicyPage';
 
 export default function App() {
   return (
@@ -32,6 +33,7 @@ export default function App() {
                     <Route path="/" element={<HomePage />} />
                     <Route path="/servicos" element={<ServicesCatalogPage />} />
                     <Route path="/servicos/:productId" element={<ServiceDetailPage />} />
+                    <Route path="/privacidade" element={<PrivacyPolicyPage />} />
                   </Route>
 
                   <Route

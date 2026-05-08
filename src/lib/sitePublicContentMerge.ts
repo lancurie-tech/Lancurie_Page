@@ -1,6 +1,14 @@
+import { DEFAULT_PRIVACY_POLICY_PAGE_CONTENT } from '@/data/defaultPrivacyPolicyPageContent';
 import { emptySitePublicContent } from '@/data/emptyPublicContent';
 import type { SiteCopyDoc } from '@/types/siteCopy';
-import type { SitePublicContent } from '@/types/sitePublicContent';
+import type { PrivacyPolicyPageContent, SitePublicContent } from '@/types/sitePublicContent';
+
+function isPrivacyPolicyUnset(pp: PrivacyPolicyPageContent): boolean {
+  if (pp.title.trim() || pp.eyebrow.trim() || pp.lastUpdatedLine.trim() || pp.backLinkLabel.trim()) {
+    return false;
+  }
+  return !pp.sections.some((s) => s.title.trim() || s.body.trim());
+}
 
 /**
  * Lê o valor: string direta, ou legado `{ pt, en }` (usa só `pt` quando possível).
@@ -26,7 +34,11 @@ function toPercent(v: unknown, fallback = 50): number {
 
 /** Aplica o documento do Firestore sobre a estrutura vazia (sem textos de repositório). */
 export function getPublicContentFromDoc(doc: SiteCopyDoc | null | undefined): SitePublicContent {
-  return mergeFromFirestore(emptySitePublicContent(), doc?.publicContent);
+  const merged = mergeFromFirestore(emptySitePublicContent(), doc?.publicContent);
+  if (isPrivacyPolicyUnset(merged.privacyPolicy)) {
+    merged.privacyPolicy = structuredClone(DEFAULT_PRIVACY_POLICY_PAGE_CONTENT);
+  }
+  return merged;
 }
 
 /**
@@ -212,6 +224,20 @@ export function mergeFromFirestore(base: SitePublicContent, over: unknown): Site
       locationLine: toStr(f.locationLine),
       emailUs: toStr(f.emailUs),
       socialAria: toStr(f.socialAria),
+    };
+  }
+  if (p.privacyPolicy && typeof p.privacyPolicy === 'object' && p.privacyPolicy !== null) {
+    const pp = p.privacyPolicy as Record<string, unknown>;
+    e.privacyPolicy = {
+      eyebrow: toStr(pp.eyebrow),
+      title: toStr(pp.title),
+      lastUpdatedLine: toStr(pp.lastUpdatedLine),
+      backLinkLabel: toStr(pp.backLinkLabel),
+      sections: e.privacyPolicy.sections.map((c, i) => {
+        const it = (pp.sections as unknown[])?.[i] as Record<string, unknown> | undefined;
+        if (!it) return c;
+        return { title: toStr(it.title), body: toStr(it.body) };
+      }) as typeof e.privacyPolicy.sections,
     };
   }
   if (p.serviceDetail && typeof p.serviceDetail === 'object' && p.serviceDetail !== null) {

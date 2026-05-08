@@ -893,6 +893,118 @@ export function AdminSiteContentPage() {
         </div>
       </HomeContentAccordionSection>
 
+      <HomeContentAccordionSection
+        title="Política de privacidade"
+        description="Textos da página pública /privacidade. Use {{dominioSite}} e {{emailContato}} para o domínio e o e-mail de contacto; **texto** para negrito; linhas começadas por «- » para marcadores; parágrafos separados por linha em branco."
+      >
+        <div className="grid gap-4">
+          <label className="block text-xs text-zinc-400">
+            Linha superior (eyebrow)
+            <input
+              type="text"
+              value={draft.publicContent.privacyPolicy.eyebrow}
+              onChange={(e) =>
+                setPublicContent((p) => ({
+                  ...p,
+                  privacyPolicy: { ...p.privacyPolicy, eyebrow: e.target.value },
+                }))
+              }
+              className="mt-1 w-full rounded-md border border-zinc-700 bg-zinc-900/80 px-2 py-1.5 text-sm text-zinc-100"
+            />
+          </label>
+          <label className="block text-xs text-zinc-400">
+            Título principal (H1)
+            <input
+              type="text"
+              value={draft.publicContent.privacyPolicy.title}
+              onChange={(e) =>
+                setPublicContent((p) => ({
+                  ...p,
+                  privacyPolicy: { ...p.privacyPolicy, title: e.target.value },
+                }))
+              }
+              className="mt-1 w-full rounded-md border border-zinc-700 bg-zinc-900/80 px-2 py-1.5 text-sm text-zinc-100"
+            />
+          </label>
+          <label className="block text-xs text-zinc-400">
+            Linha da última atualização
+            <input
+              type="text"
+              value={draft.publicContent.privacyPolicy.lastUpdatedLine}
+              onChange={(e) =>
+                setPublicContent((p) => ({
+                  ...p,
+                  privacyPolicy: { ...p.privacyPolicy, lastUpdatedLine: e.target.value },
+                }))
+              }
+              className="mt-1 w-full rounded-md border border-zinc-700 bg-zinc-900/80 px-2 py-1.5 text-sm text-zinc-100"
+            />
+          </label>
+          <label className="block text-xs text-zinc-400">
+            Texto do link «voltar»
+            <input
+              type="text"
+              value={draft.publicContent.privacyPolicy.backLinkLabel}
+              onChange={(e) =>
+                setPublicContent((p) => ({
+                  ...p,
+                  privacyPolicy: { ...p.privacyPolicy, backLinkLabel: e.target.value },
+                }))
+              }
+              className="mt-1 w-full rounded-md border border-zinc-700 bg-zinc-900/80 px-2 py-1.5 text-sm text-zinc-100"
+            />
+          </label>
+
+          <div className="space-y-6 border-t border-zinc-800/80 pt-4">
+            {draft.publicContent.privacyPolicy.sections.map((section, idx) => (
+              <div key={`privacy-section-${idx}`} className="rounded-lg border border-zinc-800/90 bg-zinc-950/40 p-3">
+                <p className="mb-2 text-[0.65rem] font-semibold uppercase tracking-wider text-zinc-500">
+                  Secção {idx + 1}
+                </p>
+                <label className="block text-xs text-zinc-400">
+                  Título (ex.: 1. Objetivo)
+                  <input
+                    type="text"
+                    value={section.title}
+                    onChange={(e) =>
+                      setPublicContent((p) => ({
+                        ...p,
+                        privacyPolicy: {
+                          ...p.privacyPolicy,
+                          sections: p.privacyPolicy.sections.map((s, j) =>
+                            j === idx ? { ...s, title: e.target.value } : s
+                          ) as typeof p.privacyPolicy.sections,
+                        },
+                      }))
+                    }
+                    className="mt-1 w-full rounded-md border border-zinc-700 bg-zinc-900/80 px-2 py-1.5 text-sm text-zinc-100"
+                  />
+                </label>
+                <label className="mt-3 block text-xs text-zinc-400">
+                  Corpo
+                  <textarea
+                    rows={8}
+                    value={section.body}
+                    onChange={(e) =>
+                      setPublicContent((p) => ({
+                        ...p,
+                        privacyPolicy: {
+                          ...p.privacyPolicy,
+                          sections: p.privacyPolicy.sections.map((s, j) =>
+                            j === idx ? { ...s, body: e.target.value } : s
+                          ) as typeof p.privacyPolicy.sections,
+                        },
+                      }))
+                    }
+                    className="mt-1 w-full rounded-md border border-zinc-700 bg-zinc-900/80 px-2 py-1.5 font-mono text-xs leading-relaxed text-zinc-100 sm:text-sm"
+                  />
+                </label>
+              </div>
+            ))}
+          </div>
+        </div>
+      </HomeContentAccordionSection>
+
       {cropEditor && cropTarget?.imageUrl ? (
         <div className="fixed inset-0 z-80 bg-black/75 p-3 backdrop-blur-sm sm:p-6" role="dialog" aria-modal>
           <div className="mx-auto flex h-full w-full max-w-5xl flex-col rounded-xl border border-zinc-700 bg-[#050508]">
