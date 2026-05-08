@@ -18,14 +18,11 @@ export type HomePageViewProps = {
   publicTextOverride?: PublicPageText;
   /** URLs de imagem definidas no admin (sobrepor aos valores por defeito). */
   siteImageOverrides?: Partial<Record<SiteImageKey, string>> | null;
-  /** Falso até à primeira leitura do `siteCopy` (evita flash de imagens antigas do bundle). */
-  siteImageReady?: boolean;
 };
 
 export function HomePageView({
   publicTextOverride,
   siteImageOverrides,
-  siteImageReady = true,
 }: HomePageViewProps) {
   const SectionHeading = ({
     title,
@@ -78,8 +75,7 @@ export function HomePageView({
   const { publicText: ctxP } = useI18n();
   const p = publicTextOverride ?? ctxP;
   const reduceMotion = useReducedMotion();
-  const img = (key: SiteImageKey) =>
-    siteImageReady ? resolveSiteImage(key, siteImageOverrides) : '';
+  const img = (key: SiteImageKey) => resolveSiteImage(key, siteImageOverrides);
   const cardFallback = img('cardFallback');
   const fadeUp = fadeUpVariants(reduceMotion);
   const staggerHero = staggerContainerVariants(reduceMotion, 0.11);

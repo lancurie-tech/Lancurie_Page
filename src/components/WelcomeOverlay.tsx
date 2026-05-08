@@ -1,9 +1,9 @@
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { clsx } from 'clsx';
 import { motion, useReducedMotion } from 'framer-motion';
+import { SITE_IMAGE_DEFAULTS } from '@/data/siteImageConfig';
 import { useI18n } from '@/i18n/useI18n';
 import { useWelcomeLayout } from '@/contexts/useWelcomeLayout';
-import { useSiteImageUrl } from '@/hooks/useSiteImage';
 
 type Phase = 'curtain' | 'ready' | 'flight' | 'gone';
 
@@ -19,9 +19,11 @@ const SHEEN_FALLBACK_MS = 3200;
 /**
  * Recepção premium: entrada em mola, clarão em ecrã inteiro (E→D, depois D→E), depois voo até ao header.
  */
+/** Sempre o asset local (preload em index.html); o cabeçalho usa URL do Firestore/Storage. */
+const welcomeLogoSrc = SITE_IMAGE_DEFAULTS.logoFull;
+
 export function WelcomeOverlay() {
   const { publicText: p } = useI18n();
-  const logoSrc = useSiteImageUrl('logoFull');
   const reduced = useReducedMotion();
   const { headerLogoAnchorRef, setSiteVisualUnlocked } = useWelcomeLayout();
   const [phase, setPhase] = useState<Phase>('curtain');
@@ -158,28 +160,30 @@ export function WelcomeOverlay() {
           )}
         >
           <div className="relative flex flex-col items-center">
-            <div className="relative">
-              {logoSrc ? (
-                <motion.img
-                  ref={centerLogoRef}
-                  src={logoSrc}
-                  alt={p.brandName}
-                  width={560}
-                  height={160}
-                  draggable={false}
-                  className="relative z-1 h-auto w-[min(94vw,560px)] max-h-[min(38vh,220px)] object-contain object-center drop-shadow-[0_20px_64px_rgba(0,0,0,0.55)] sm:max-h-[min(42vh,260px)] md:max-h-[min(44vh,300px)]"
-                  initial={{ opacity: 0, scale: 0.88, y: 40 }}
-                  animate={
-                    phase === 'ready'
-                      ? { opacity: 1, scale: 1, y: 0 }
-                      : { opacity: 0, scale: 0.88, y: 40 }
-                  }
-                  transition={{
-                    ...springEnter,
-                    delay: phase === 'ready' ? 0.09 : 0,
-                  }}
-                />
-              ) : null}
+            {/* Caixa fixa evita salto de layout quando o src troca (proporções diferentes entre PNGs). */}
+            <div
+              className="relative flex h-[min(38vh,220px)] w-[min(94vw,560px)] items-center justify-center sm:h-[min(42vh,260px)] md:h-[min(44vh,300px)]"
+            >
+              <motion.img
+                ref={centerLogoRef}
+                src={welcomeLogoSrc}
+                alt={p.brandName}
+                width={560}
+                height={160}
+                fetchPriority="high"
+                draggable={false}
+                className="relative z-1 h-full w-full object-contain object-center drop-shadow-[0_20px_64px_rgba(0,0,0,0.55)]"
+                initial={{ opacity: 0, scale: 0.88, y: 40 }}
+                animate={
+                  phase === 'ready'
+                    ? { opacity: 1, scale: 1, y: 0 }
+                    : { opacity: 0, scale: 0.88, y: 40 }
+                }
+                transition={{
+                  ...springEnter,
+                  delay: phase === 'ready' ? 0.09 : 0,
+                }}
+              />
             </div>
           </div>
         </div>
@@ -199,10 +203,10 @@ export function WelcomeOverlay() {
         </div>
       ) : null}
 
-      {isFlight && flightBox && logoSrc ? (
+      {isFlight && flightBox ? (
         <motion.img
           aria-hidden
-          src={logoSrc}
+          src={welcomeLogoSrc}
           alt=""
           width={420}
           height={120}

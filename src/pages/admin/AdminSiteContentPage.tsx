@@ -1034,7 +1034,6 @@ export function AdminSiteContentPage() {
           <HomePageView
             publicTextOverride={previewText}
             siteImageOverrides={mergedSiteImages}
-            siteImageReady
           />
         </div>
       </div>

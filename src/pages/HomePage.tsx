@@ -4,7 +4,7 @@ import { useSiteCopy } from '@/contexts/useSiteCopy';
 import { HomePageView } from '@/pages/HomePageView';
 
 export function HomePage() {
-  const { doc, ready: siteImageReady } = useSiteCopy();
+  const { doc } = useSiteCopy();
   const { hash, pathname } = useLocation();
 
   useLayoutEffect(() => {
@@ -24,10 +24,5 @@ export function HomePage() {
     }
   }, [hash, pathname]);
 
-  return (
-    <HomePageView
-      siteImageOverrides={doc?.images}
-      siteImageReady={siteImageReady}
-    />
-  );
+  return <HomePageView siteImageOverrides={doc?.images} />;
 }

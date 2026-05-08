@@ -76,16 +76,22 @@ export function SiteHeader() {
             className="inline-flex max-w-full items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-500/70"
           >
             {logoSrc ? (
-              <img
-                src={logoSrc}
-                alt={p.brandName}
-                width={420}
-                height={108}
+              <span
                 className={cn(
-                  'h-13 w-auto max-w-[min(92vw,360px)] object-contain object-center transition-opacity duration-300 sm:h-[3.65rem] sm:max-w-[min(100%,400px)] md:h-16 md:max-w-[min(100%,440px)] lg:h-[4.35rem]',
-                  siteVisualUnlocked ? 'opacity-100' : 'opacity-0'
+                  'inline-flex h-13 max-w-[min(92vw,360px)] items-center justify-center sm:h-[3.65rem] sm:max-w-[min(100%,400px)] md:h-16 md:max-w-[min(100%,440px)] lg:h-[4.35rem]'
                 )}
-              />
+              >
+                <img
+                  src={logoSrc}
+                  alt={p.brandName}
+                  width={420}
+                  height={108}
+                  className={cn(
+                    'h-full w-full object-contain object-center transition-opacity duration-300',
+                    siteVisualUnlocked ? 'opacity-100' : 'opacity-0'
+                  )}
+                />
+              </span>
             ) : null}
           </Link>
         </div>
