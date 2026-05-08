@@ -1,4 +1,4 @@
-import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
 import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
 import { MessageCircle, Send, X } from 'lucide-react';
 import { usePublicSiteSettings } from '@/contexts/usePublicSiteSettings';
@@ -20,6 +20,10 @@ function newId(): string {
   return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
 }
 
+function freshInitialMessages(): ChatEntry[] {
+  return INITIAL_MESSAGES.map((m) => ({ ...m }));
+}
+
 export function ChatLauncher() {
   const { whatsappPhone } = usePublicSiteSettings();
   const reduceMotion = useReducedMotion();
@@ -27,7 +31,7 @@ export function ChatLauncher() {
   const panelId = useId();
 
   const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatEntry[]>(INITIAL_MESSAGES);
+  const [messages, setMessages] = useState<ChatEntry[]>(() => freshInitialMessages());
   const [draft, setDraft] = useState('');
   const buttonRef = useRef<HTMLButtonElement | null>(null);
   const closeRef = useRef<HTMLButtonElement | null>(null);
@@ -46,18 +50,18 @@ export function ChatLauncher() {
     [whatsappPhone]
   );
 
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handle = () => setOpen(true);
-    window.addEventListener('lancurie:open-chat', handle);
-    return () => window.removeEventListener('lancurie:open-chat', handle);
+  const openChatPanel = useCallback(() => {
+    setMessages(freshInitialMessages());
+    setDraft('');
+    setOpen(true);
   }, []);
 
-  useLayoutEffect(() => {
-    if (!open) return;
-    setMessages(INITIAL_MESSAGES.map((m) => ({ ...m })));
-    setDraft('');
-  }, [open]);
+  useEffect(() => {
+    if (typeof window === 'undefined') return;
+    const handle = () => openChatPanel();
+    window.addEventListener('lancurie:open-chat', handle);
+    return () => window.removeEventListener('lancurie:open-chat', handle);
+  }, [openChatPanel]);
 
   useEffect(() => {
     if (!open) return;
@@ -129,7 +133,7 @@ export function ChatLauncher() {
               exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.97 }}
               transition={{ duration: reduceMotion ? 0.18 : 0.32, ease: [0.22, 1, 0.36, 1] }}
               className={cn(
-                'relative flex min-h-[16.75rem] max-h-[min(26rem,62vh)] w-full flex-col overflow-hidden rounded-xl border border-zinc-700/70 bg-[#12131a] text-[13px] leading-snug antialiased shadow-[0_24px_56px_-20px_rgba(0,0,0,0.82)] sm:min-h-[17.5rem]'
+                'relative flex min-h-67 max-h-[min(26rem,62vh)] w-full flex-col overflow-hidden rounded-xl border border-zinc-700/70 bg-[#12131a] text-[13px] leading-snug antialiased shadow-[0_24px_56px_-20px_rgba(0,0,0,0.82)] sm:min-h-70'
               )}
             >
               <header className="flex shrink-0 items-center justify-between gap-3 border-b border-zinc-800/90 px-3 py-2.5 sm:px-4">
@@ -256,7 +260,7 @@ export function ChatLauncher() {
         <motion.button
           ref={buttonRef}
           type="button"
-          onClick={() => setOpen((value) => !value)}
+          onClick={() => (open ? setOpen(false) : openChatPanel())}
           aria-label={open ? 'Fechar chat Lancurie' : 'Abrir chat Lancurie'}
           aria-expanded={open}
           aria-controls={panelId}
