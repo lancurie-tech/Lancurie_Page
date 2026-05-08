@@ -61,13 +61,19 @@ function AdminHeader({ adminLogo }: { adminLogo: string | null }) {
             className="inline-flex max-w-full min-h-13 items-center justify-center focus-visible:outline-2 focus-visible:outline-offset-4 focus-visible:outline-zinc-500/70 sm:min-h-[3.65rem] md:min-h-16 lg:min-h-[4.35rem]"
           >
             {adminLogo ? (
-              <img
-                src={adminLogo}
-                alt="Lancurie Technology"
-                width={420}
-                height={108}
-                className="h-13 w-auto max-w-[min(92vw,360px)] object-contain object-center sm:h-[3.65rem] sm:max-w-[min(100%,400px)] md:h-16 md:max-w-[min(100%,440px)] lg:h-[4.35rem]"
-              />
+              <span
+                className={cn(
+                  'inline-flex h-13 max-w-[min(92vw,360px)] items-center justify-center sm:h-[3.65rem] sm:max-w-[min(100%,400px)] md:h-16 md:max-w-[min(100%,440px)] lg:h-[4.35rem]'
+                )}
+              >
+                <img
+                  src={adminLogo}
+                  alt="Lancurie Technology"
+                  width={420}
+                  height={108}
+                  className="h-full w-full object-contain object-center"
+                />
+              </span>
             ) : null}
           </Link>
         </div>

@@ -39,8 +39,8 @@ export const SITE_IMAGE_FIELDS: SiteImageFieldMeta[] = [
 ];
 
 export const SITE_IMAGE_DEFAULTS: Record<SiteImageKey, string> = {
-  /** Alinhar com os assets em `public/brand/` (evita flash de ficheiros antigos antes do Firestore). */
-  logoFull: '/brand/logo_2.png',
+  /** Alinhar com `public/brand/` e com `<link rel="preload">` em `index.html` (cache no primeiro pedido). */
+  logoFull: '/brand/logo_2_novo_novo.png',
   footerFavicon: '/brand/logo_2_favicon.png',
   wordmark: '/brand/logo_logo_lan.png',
   cardFallback: '/brand/logo_2_logo.png',

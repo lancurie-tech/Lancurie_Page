@@ -18,14 +18,11 @@ export type HomePageViewProps = {
   publicTextOverride?: PublicPageText;
   /** URLs de imagem definidas no admin (sobrepor aos valores por defeito). */
   siteImageOverrides?: Partial<Record<SiteImageKey, string>> | null;
-  /** Falso até à primeira leitura do `siteCopy` (evita flash de imagens antigas do bundle). */
-  siteImageReady?: boolean;
 };
 
 export function HomePageView({
   publicTextOverride,
   siteImageOverrides,
-  siteImageReady = true,
 }: HomePageViewProps) {
   const SectionHeading = ({
     title,
@@ -78,8 +75,7 @@ export function HomePageView({
   const { publicText: ctxP } = useI18n();
   const p = publicTextOverride ?? ctxP;
   const reduceMotion = useReducedMotion();
-  const img = (key: SiteImageKey) =>
-    siteImageReady ? resolveSiteImage(key, siteImageOverrides) : '';
+  const img = (key: SiteImageKey) => resolveSiteImage(key, siteImageOverrides);
   const cardFallback = img('cardFallback');
   const fadeUp = fadeUpVariants(reduceMotion);
   const staggerHero = staggerContainerVariants(reduceMotion, 0.11);
@@ -88,16 +84,13 @@ export function HomePageView({
   const [approachPaused, setApproachPaused] = useState(false);
   const [approachHoverPaused, setApproachHoverPaused] = useState(false);
   const [approachTouchPaused, setApproachTouchPaused] = useState(false);
-  const [proofMobileTouchPaused, setProofMobileTouchPaused] = useState(false);
   const [approachDirection, setApproachDirection] = useState<1 | -1>(1);
   const [isMobileViewport, setIsMobileViewport] = useState(false);
+  const [proofMobileActiveIdx, setProofMobileActiveIdx] = useState(0);
   const approachPauseTimeoutRef = useRef<number | null>(null);
   const approachHoverResumeTimeoutRef = useRef<number | null>(null);
   const approachTouchResumeTimeoutRef = useRef<number | null>(null);
-  const proofMobileTouchResumeTimeoutRef = useRef<number | null>(null);
   const proofMobileRailRef = useRef<HTMLDivElement | null>(null);
-  const proofMobileRafRef = useRef<number | null>(null);
-  const proofMobileLastTsRef = useRef<number | null>(null);
   const homeProducts = useMemo<Product[]>(
     () =>
       p.products
@@ -122,7 +115,6 @@ export function HomePageView({
   const approachItems = p.principles.items;
   const proofItems = p.proof.cards;
   const safeApproachIdx = approachItems.length > 0 ? approachIdx % approachItems.length : 0;
-  const proofMobileLoop = proofItems.length > 0 ? [...proofItems, ...proofItems] : [];
   const isTouchLike = () => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
   const goNextApproach = () => {
     if (approachItems.length <= 1) return;
@@ -156,19 +148,6 @@ export function HomePageView({
       approachTouchResumeTimeoutRef.current = null;
     }
   };
-  const clearProofMobileTouchResumeTimeout = () => {
-    if (proofMobileTouchResumeTimeoutRef.current != null) {
-      window.clearTimeout(proofMobileTouchResumeTimeoutRef.current);
-      proofMobileTouchResumeTimeoutRef.current = null;
-    }
-  };
-  const scheduleProofMobileTouchResume = () => {
-    clearProofMobileTouchResumeTimeout();
-    proofMobileTouchResumeTimeoutRef.current = window.setTimeout(() => {
-      setProofMobileTouchPaused(false);
-      proofMobileTouchResumeTimeoutRef.current = null;
-    }, 1000);
-  };
   useEffect(() => {
     if (typeof window === 'undefined') return;
     const media = window.matchMedia('(max-width: 767px)');
@@ -188,28 +167,50 @@ export function HomePageView({
   }, [approachHoverPaused, approachPaused, approachItems.length, approachTouchPaused, reduceMotion]);
 
   useEffect(() => {
-    if (reduceMotion || proofMobileTouchPaused || !isMobileViewport || proofItems.length <= 1) return;
-    const rail = proofMobileRailRef.current;
-    if (!rail) return;
-    const animate = (ts: number) => {
-      if (proofMobileLastTsRef.current == null) proofMobileLastTsRef.current = ts;
-      const dt = ts - (proofMobileLastTsRef.current ?? ts);
-      proofMobileLastTsRef.current = ts;
-      const pxPerSecond = 22;
-      rail.scrollLeft += (pxPerSecond * dt) / 1000;
-      const half = rail.scrollWidth / 2;
-      if (half > 0 && rail.scrollLeft >= half) rail.scrollLeft -= half;
-      proofMobileRafRef.current = window.requestAnimationFrame(animate);
+    const root = proofMobileRailRef.current;
+    if (!root || proofItems.length <= 1) return;
+    const cards = Array.from(root.querySelectorAll<HTMLElement>(':scope > article'));
+    if (cards.length === 0) return;
+
+    const pickBest = () => {
+      let bestIdx = 0;
+      let bestScore = -Infinity;
+      const rootRect = root.getBoundingClientRect();
+      const mid = rootRect.left + rootRect.width / 2;
+      cards.forEach((el, idx) => {
+        const r = el.getBoundingClientRect();
+        const ratio =
+          r.width > 0 && r.height > 0
+            ? Math.max(
+                0,
+                (Math.min(r.right, rootRect.right) - Math.max(r.left, rootRect.left)) / r.width
+              )
+            : 0;
+        const centerDist = Math.abs(r.left + r.width / 2 - mid);
+        const score = ratio * 100 - centerDist / 10;
+        if (score > bestScore) {
+          bestScore = score;
+          bestIdx = idx;
+        }
+      });
+      setProofMobileActiveIdx(bestIdx);
     };
-    proofMobileRafRef.current = window.requestAnimationFrame(animate);
+
+    const io = new IntersectionObserver(
+      () => {
+        pickBest();
+      },
+      { root, threshold: [0.2, 0.35, 0.5, 0.65, 0.8] }
+    );
+    cards.forEach((c) => io.observe(c));
+    root.addEventListener('scroll', pickBest, { passive: true });
+    pickBest();
+
     return () => {
-      if (proofMobileRafRef.current != null) {
-        window.cancelAnimationFrame(proofMobileRafRef.current);
-        proofMobileRafRef.current = null;
-      }
-      proofMobileLastTsRef.current = null;
+      io.disconnect();
+      root.removeEventListener('scroll', pickBest);
     };
-  }, [isMobileViewport, proofItems.length, proofMobileTouchPaused, reduceMotion]);
+  }, [proofItems.length]);
 
   useEffect(() => {
     return () => {
@@ -218,10 +219,6 @@ export function HomePageView({
       }
       clearApproachHoverResumeTimeout();
       clearApproachTouchResumeTimeout();
-      clearProofMobileTouchResumeTimeout();
-      if (proofMobileRafRef.current != null) {
-        window.cancelAnimationFrame(proofMobileRafRef.current);
-      }
     };
   }, []);
 
@@ -652,39 +649,18 @@ export function HomePageView({
             <div
               ref={proofMobileRailRef}
               className="relative -mx-4 flex snap-x snap-mandatory gap-3 overflow-x-auto px-4 pb-1 [scrollbar-width:none] [&::-webkit-scrollbar]:hidden"
-              onPointerDown={(event) => {
-                if (event.pointerType === 'touch') {
-                  clearProofMobileTouchResumeTimeout();
-                  setProofMobileTouchPaused(true);
-                }
-              }}
-              onPointerUp={(event) => {
-                if (event.pointerType === 'touch') {
-                  scheduleProofMobileTouchResume();
-                }
-              }}
-              onPointerCancel={(event) => {
-                if (event.pointerType === 'touch') {
-                  scheduleProofMobileTouchResume();
-                }
-              }}
-              onPointerLeave={(event) => {
-                if (event.pointerType === 'touch') {
-                  scheduleProofMobileTouchResume();
-                }
-              }}
             >
-              {proofMobileLoop.map((card, idx) => {
+              {proofItems.map((card, idx) => {
                 const Icon = PROOF_ICONS[idx % PROOF_ICONS.length] ?? Activity;
                 return (
                   <motion.article
-                    key={`proof-mobile-list-${idx}-${card.title}`}
+                    key={`proof-mobile-${idx}-${card.title}`}
                     initial="hidden"
                     whileInView="visible"
                     viewport={viewportOnce}
                     variants={fadeUp}
                     className={cn(
-                      'group h-[16.6rem] w-[min(88vw,20.5rem)] shrink-0 snap-center rounded-2xl border border-zinc-500/38 bg-zinc-900/38 p-5 shadow-lg shadow-black/25 ring-1 ring-inset ring-white/5'
+                      'group h-[16.6rem] w-[min(76vw,18rem)] shrink-0 snap-center rounded-2xl border border-zinc-500/38 bg-zinc-900/38 p-5 shadow-lg shadow-black/25 ring-1 ring-inset ring-white/5'
                     )}
                   >
                     <div className="mb-4 flex items-start justify-between gap-3">
@@ -704,6 +680,34 @@ export function HomePageView({
                 );
               })}
             </div>
+
+            {proofItems.length > 1 ? (
+              <div className="mt-4 flex items-center justify-center">
+                <div className="flex items-center gap-2">
+                  {proofItems.map((card, i) => (
+                    <button
+                      key={`proof-mobile-dot-${i}-${card.title}`}
+                      type="button"
+                      onClick={() => {
+                        const rail = proofMobileRailRef.current;
+                        const target = rail?.querySelectorAll<HTMLElement>(':scope > article')[i];
+                        target?.scrollIntoView({ behavior: 'smooth', inline: 'center', block: 'nearest' });
+                      }}
+                      className={cn(
+                        'h-1.5 rounded-full transition-all',
+                        i === proofMobileActiveIdx
+                          ? isWarm
+                            ? 'w-7 bg-orange-300/90'
+                            : 'w-7 bg-cyan-300/85'
+                          : 'w-3 bg-zinc-600/75'
+                      )}
+                      aria-label={`Mostrar projeto ${i + 1}`}
+                      aria-current={i === proofMobileActiveIdx ? 'true' : undefined}
+                    />
+                  ))}
+                </div>
+              </div>
+            ) : null}
           </div>
 
           <div className="hidden sm:grid sm:grid-cols-2 sm:gap-5 lg:grid-cols-3 lg:gap-6">

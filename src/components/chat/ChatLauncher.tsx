@@ -20,7 +20,7 @@ export function ChatLauncher() {
       className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-end px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:pb-6"
       aria-live="off"
     >
-      <div className="pointer-events-auto relative flex w-full max-w-[min(100%,20rem)] flex-col items-end sm:max-w-88">
+      <div className="pointer-events-auto relative flex shrink-0 flex-col items-end">
         <motion.a
           href={whatsappHref}
           target="_blank"

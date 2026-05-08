@@ -44,6 +44,32 @@ export type HomeProductContent = {
   focalY?: number;
 };
 
+export type PrivacyPolicySectionContent = {
+  title: string;
+  /** Parágrafos separados por linha em branco; linhas `- ` viram lista; `**texto**` negrito; `{{dominioSite}}` e `{{emailContato}}` substituídos no site. */
+  body: string;
+};
+
+export type PrivacyPolicySectionsTuple = [
+  PrivacyPolicySectionContent,
+  PrivacyPolicySectionContent,
+  PrivacyPolicySectionContent,
+  PrivacyPolicySectionContent,
+  PrivacyPolicySectionContent,
+  PrivacyPolicySectionContent,
+  PrivacyPolicySectionContent,
+  PrivacyPolicySectionContent,
+  PrivacyPolicySectionContent,
+];
+
+export type PrivacyPolicyPageContent = {
+  eyebrow: string;
+  title: string;
+  lastUpdatedLine: string;
+  backLinkLabel: string;
+  sections: PrivacyPolicySectionsTuple;
+};
+
 export type ContactFormFields = {
   name: string;
   email: string;
@@ -90,6 +116,8 @@ export type SitePublicContent = {
     form: ContactFormFields;
   };
   footer: { rights: string; built: string; locationLine: string; emailUs: string; socialAria: string };
+  /** Textos da rota `/privacidade` (editável no admin). */
+  privacyPolicy: PrivacyPolicyPageContent;
   serviceDetail: { back: string; contactCta: string };
   welcome: { line: string };
   marketing: { subnavAria: string };

@@ -1,5 +1,13 @@
-import { useEffect, useMemo, useRef, useState, type PointerEvent as ReactPointerEvent } from 'react';
-import createGlobe from 'cobe';
+import {
+  useCallback,
+  useEffect,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+  type PointerEvent as ReactPointerEvent,
+} from 'react';
+import createGlobe, { type Globe } from 'cobe';
 
 type GeoPoint = {
   id: string;
@@ -34,42 +42,83 @@ type ProjectedMarker = {
   label: string;
 };
 
+type HoveredMarkerMeta = { id: string; label: string; count: number };
+
+/** Tamanhos para o cobe ficam ~3x menores que antes (globo mais limpo). */
 function markerSize(count: number, max: number): number {
-  if (max <= 1) return 0.08;
+  if (max <= 1) return 0.028;
   const t = Math.max(0, Math.min(1, count / max));
-  return 0.07 + t * 0.12;
+  return 0.022 + t * 0.038;
 }
 
-function projectMarker(
+/** Igual ao `U()` interno do cobe: lat/lon em graus → vetor na esfera normalizada. */
+function latLonToCobeUnit(latDeg: number, lonDeg: number): [number, number, number] {
+  const latRad = (latDeg * Math.PI) / 180;
+  const lonAdj = (lonDeg * Math.PI) / 180 - Math.PI;
+  const cl = Math.cos(latRad);
+  return [-cl * Math.cos(lonAdj), Math.sin(latRad), cl * Math.sin(lonAdj)];
+}
+
+const COBE_BASE_RADIUS = 0.8;
+const COBE_MARKER_ELEVATION = 0.05;
+
+/** Mesma rotação que o vertex shader dos marcadores do cobe (componentes `l.xy` e `l.z`). */
+function markerRotatedPlane(
+  marker: GlobeMarker,
+  phi: number,
+  theta: number
+): { c: number; s: number; nz: number } {
+  const base = latLonToCobeUnit(marker.latitude, marker.longitude);
+  const rScale = COBE_BASE_RADIUS + COBE_MARKER_ELEVATION;
+  const tx = base[0] * rScale;
+  const ty = base[1] * rScale;
+  const tz = base[2] * rScale;
+
+  const ct = Math.cos(theta);
+  const st = Math.sin(theta);
+  const cp = Math.cos(phi);
+  const sp = Math.sin(phi);
+
+  const c = cp * tx + sp * tz;
+  const s = st * sp * tx + ct * ty - cp * st * tz;
+  const nz = -sp * ct * tx + st * ty + cp * ct * tz;
+  return { c, s, nz };
+}
+
+/**
+ * Overlay: só projeta com `nz ≥ 0` (face voltada à câmera), alinhado ao vertex shader do cobe.
+ */
+
+function projectMarkerOverlay(
   marker: GlobeMarker,
   phi: number,
   theta: number,
-  radius: number,
-  center: number
+  canvas: HTMLCanvasElement,
+  scaleB: number,
+  devicePixelRatioOption: number
 ): ProjectedMarker | null {
-  const lat = (marker.latitude * Math.PI) / 180;
-  const lon = (marker.longitude * Math.PI) / 180;
-  const x = Math.cos(lat) * Math.cos(lon);
-  const y = Math.sin(lat);
-  const z = Math.cos(lat) * Math.sin(lon);
+  const bw = canvas.width;
+  const bh = canvas.height;
+  const cw = canvas.clientWidth;
+  const ch = canvas.clientHeight;
+  if (bw < 16 || bh < 16 || cw < 8 || ch < 8) return null;
 
-  const cosPhi = Math.cos(phi);
-  const sinPhi = Math.sin(phi);
-  const x1 = x * cosPhi - z * sinPhi;
-  const z1 = x * sinPhi + z * cosPhi;
+  const { c, s, nz } = markerRotatedPlane(marker, phi, theta);
+  if (nz < 0) return null;
 
-  const cosTheta = Math.cos(theta);
-  const sinTheta = Math.sin(theta);
-  const y1 = y * cosTheta - z1 * sinTheta;
-  const z2 = y * sinTheta + z1 * cosTheta;
+  const B = scaleB;
+  const T0 = 0;
+  const T1 = 0;
+  const n = devicePixelRatioOption;
 
-  if (z2 < 0.08) return null;
+  const xNorm = (c / (bw / bh) * B + (T0 * B * n) / bw + 1) / 2;
+  const yNorm = (-s * B + (T1 * B * n) / bh + 1) / 2;
 
   return {
     id: marker.id,
-    x: center + x1 * radius,
-    y: center - y1 * radius,
-    sizePx: 4 + marker.size * 28,
+    x: xNorm * cw,
+    y: yNorm * ch,
+    sizePx: Math.max(10, 6 + marker.size * 95),
     label: marker.label,
     count: marker.count,
   };
@@ -78,6 +127,14 @@ function projectMarker(
 export function WorldAccessMap({ points, totalVisits }: WorldAccessMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
+  const globeRef = useRef<Globe | null>(null);
+  const globeDprRef = useRef(1);
+  const markersRef = useRef<GlobeMarker[]>([]);
+  const markerBtnRefs = useRef<Map<string, HTMLButtonElement>>(new Map());
+  const tooltipRef = useRef<HTMLDivElement | null>(null);
+  const hoveredRef = useRef<HoveredMarkerMeta | null>(null);
+  const scaleRef = useRef(1);
+  const sizeRef = useRef(420);
   const phiRef = useRef(0.35);
   const thetaRef = useRef(0.3);
   const velocityPhiRef = useRef(0);
@@ -89,8 +146,70 @@ export function WorldAccessMap({ points, totalVisits }: WorldAccessMapProps) {
   const [size, setSize] = useState(420);
   const [scale, setScale] = useState(1);
   const [isDragging, setIsDragging] = useState(false);
-  const [projectedMarkers, setProjectedMarkers] = useState<ProjectedMarker[]>([]);
-  const [hovered, setHovered] = useState<ProjectedMarker | null>(null);
+  const [hovered, setHovered] = useState<HoveredMarkerMeta | null>(null);
+
+  const pushGlobeGLFrame = useCallback(() => {
+    const globe = globeRef.current;
+    if (!globe) return;
+    const currentSize = Math.max(64, sizeRef.current);
+    globe.update({
+      width: currentSize * 2,
+      height: currentSize * 2,
+      phi: phiRef.current,
+      theta: thetaRef.current,
+      scale: scaleRef.current,
+    });
+  }, []);
+
+  /** Posições dos pins sem passar por setState (alinha ao mesmo frame que o GL / pointermove). */
+  const syncMarkerOverlayDom = useCallback(() => {
+    const canvasEl = canvasRef.current;
+    if (!canvasEl) return;
+
+    const phi = phiRef.current;
+    const theta = thetaRef.current;
+    const currentScale = scaleRef.current;
+    const dpr = globeDprRef.current;
+    const list = markersRef.current;
+    const sz = sizeRef.current;
+
+    for (const m of list) {
+      const el = markerBtnRefs.current.get(m.id);
+      if (!el) continue;
+
+      const p = projectMarkerOverlay(m, phi, theta, canvasEl, currentScale, dpr);
+      if (!p) {
+        el.style.visibility = 'hidden';
+        el.style.pointerEvents = 'none';
+        continue;
+      }
+      el.style.visibility = 'visible';
+      el.style.pointerEvents = 'auto';
+      el.style.left = `${p.x}px`;
+      el.style.top = `${p.y}px`;
+      el.style.width = `${p.sizePx}px`;
+      el.style.height = `${p.sizePx}px`;
+    }
+
+    const tip = tooltipRef.current;
+    const hov = hoveredRef.current;
+    if (!tip) return;
+
+    if (!hov) {
+      tip.style.visibility = 'hidden';
+      return;
+    }
+
+    const m = list.find((x) => x.id === hov.id);
+    const tp = m ? projectMarkerOverlay(m, phi, theta, canvasEl, currentScale, dpr) : null;
+    if (tp) {
+      tip.style.visibility = 'visible';
+      tip.style.left = `${Math.min(sz - 20, tp.x + 14)}px`;
+      tip.style.top = `${Math.max(16, tp.y - 10)}px`;
+    } else {
+      tip.style.visibility = 'hidden';
+    }
+  }, []);
 
   useEffect(() => {
     const host = containerRef.current;
@@ -120,75 +239,80 @@ export function WorldAccessMap({ points, totalVisits }: WorldAccessMapProps) {
     });
   }, [points]);
 
+  useLayoutEffect(() => {
+    markersRef.current = markers;
+    scaleRef.current = scale;
+    sizeRef.current = size;
+    syncMarkerOverlayDom();
+  }, [markers, scale, size, hovered, syncMarkerOverlayDom]);
+
   useEffect(() => {
     const canvas = canvasRef.current;
     if (!canvas) return;
+    const pxSize = Math.max(64, size);
+    let cancelled = false;
+    let rafId = 0;
 
-    phiRef.current = phiRef.current || 0.35;
-    const globe = createGlobe(canvas, {
-      devicePixelRatio: 2,
-      width: size * 2,
-      height: size * 2,
-      phi: phiRef.current,
-      theta: thetaRef.current,
-      dark: 1,
-      diffuse: 1.25,
-      mapSamples: 20000,
-      mapBrightness: 5.6,
-      baseColor: [0.09, 0.16, 0.32],
-      markerColor: [0.12, 0.95, 1],
-      glowColor: [0.08, 0.25, 0.5],
-      markers: markers.map((m) => ({ location: [m.latitude, m.longitude] as [number, number], size: m.size })),
-      scale,
-    });
-
-    let frame = 0;
-    let lastOverlayTs = 0;
-    const animate = () => {
-      const now = performance.now();
-      if (!draggingRef.current) {
-        if (now - lastInteractionRef.current > 900) {
-          velocityPhiRef.current += 0.00045;
-        }
-        phiRef.current += velocityPhiRef.current;
-        thetaRef.current += velocityThetaRef.current;
-
-        velocityPhiRef.current *= 0.94;
-        velocityThetaRef.current *= 0.9;
-
-        if (Math.abs(velocityPhiRef.current) < 0.00002) velocityPhiRef.current = 0;
-        if (Math.abs(velocityThetaRef.current) < 0.00002) velocityThetaRef.current = 0;
-      }
-      thetaRef.current = Math.max(-0.95, Math.min(0.95, thetaRef.current));
-
-      globe.update({
-        width: size * 2,
-        height: size * 2,
+    const boot = () => {
+      if (cancelled || !canvasRef.current) return;
+      const c = canvasRef.current;
+      phiRef.current = phiRef.current || 0.35;
+      const dprOpt = Math.min(2, typeof window !== 'undefined' ? window.devicePixelRatio || 1 : 2);
+      globeDprRef.current = dprOpt;
+      // Marcadores só no overlay HTML — o WebGL do cobe também os desenharia e ficariam duplicados.
+      const globe = createGlobe(c, {
+        devicePixelRatio: dprOpt,
+        width: pxSize * 2,
+        height: pxSize * 2,
         phi: phiRef.current,
         theta: thetaRef.current,
-        markers: markers.map((m) => ({ location: [m.latitude, m.longitude] as [number, number], size: m.size })),
-        scale,
+        dark: 1,
+        diffuse: 1.25,
+        mapSamples: 20000,
+        mapBrightness: 5.6,
+        baseColor: [0.09, 0.16, 0.32],
+        markerColor: [0.12, 0.95, 1],
+        glowColor: [0.08, 0.25, 0.5],
+        scale: scaleRef.current,
       });
+      globeRef.current = globe;
 
-      if (now - lastOverlayTs > 60) {
-        const radius = size * 0.47 * scale;
-        const center = size / 2;
-        setProjectedMarkers(
-          markers
-            .map((m) => projectMarker(m, phiRef.current, thetaRef.current, radius, center))
-            .filter((m): m is ProjectedMarker => Boolean(m))
-        );
-        lastOverlayTs = now;
-      }
-      frame = window.requestAnimationFrame(animate);
+      const animate = () => {
+        if (cancelled) return;
+        const now = performance.now();
+
+        if (!draggingRef.current) {
+          if (now - lastInteractionRef.current > 900) {
+            velocityPhiRef.current += 0.00045;
+          }
+          phiRef.current += velocityPhiRef.current;
+          thetaRef.current += velocityThetaRef.current;
+
+          velocityPhiRef.current *= 0.94;
+          velocityThetaRef.current *= 0.9;
+
+          if (Math.abs(velocityPhiRef.current) < 0.00002) velocityPhiRef.current = 0;
+          if (Math.abs(velocityThetaRef.current) < 0.00002) velocityThetaRef.current = 0;
+        }
+        thetaRef.current = Math.max(-0.95, Math.min(0.95, thetaRef.current));
+
+        pushGlobeGLFrame();
+
+        syncMarkerOverlayDom();
+        rafId = window.requestAnimationFrame(animate);
+      };
+      rafId = window.requestAnimationFrame(animate);
     };
-    frame = window.requestAnimationFrame(animate);
+
+    rafId = window.requestAnimationFrame(boot);
 
     return () => {
-      window.cancelAnimationFrame(frame);
-      globe.destroy();
+      cancelled = true;
+      window.cancelAnimationFrame(rafId);
+      globeRef.current?.destroy();
+      globeRef.current = null;
     };
-  }, [markers, size, scale]);
+  }, [size, pushGlobeGLFrame, syncMarkerOverlayDom]);
 
   const onPointerDown = (event: ReactPointerEvent<HTMLCanvasElement>) => {
     draggingRef.current = true;
@@ -216,6 +340,10 @@ export function WorldAccessMap({ points, totalVisits }: WorldAccessMapProps) {
     thetaRef.current += deltaY * 0.01;
     thetaRef.current = Math.max(-0.95, Math.min(0.95, thetaRef.current));
     lastInteractionRef.current = performance.now();
+
+    // Sem isto o GL e os pins só atualizam no próximo RAF (normalmente após o pointermove).
+    pushGlobeGLFrame();
+    syncMarkerOverlayDom();
   };
 
   const onPointerUp = () => {
@@ -251,49 +379,71 @@ export function WorldAccessMap({ points, totalVisits }: WorldAccessMapProps) {
 
       <div
         ref={containerRef}
-        className="relative mt-4 flex min-h-[320px] items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-[radial-gradient(circle_at_50%_40%,rgba(10,68,122,0.2),rgba(5,8,15,0.95)_65%)]"
+        className="relative mt-4 flex min-h-[320px] flex-col items-center justify-center overflow-hidden rounded-xl border border-zinc-800 bg-[radial-gradient(circle_at_50%_40%,rgba(10,68,122,0.2),rgba(5,8,15,0.95)_65%)]"
       >
-        <canvas
-          ref={canvasRef}
-          onPointerDown={onPointerDown}
-          onPointerMove={onPointerMove}
-          onPointerUp={onPointerUp}
-          onPointerLeave={onPointerUp}
+        {/*
+          Quadrado explícito + mx-auto: o cobe envolve o canvas num div width/height 100%;
+          sem isto o wrapper estica na flex e o globo fica visualmente à esquerda.
+        */}
+        <div
+          className="relative mx-auto shrink-0"
           style={{
             width: `${size}px`,
             height: `${size}px`,
             maxWidth: '100%',
-            touchAction: 'none',
-            cursor: isDragging ? 'grabbing' : 'grab',
           }}
-          aria-label="Globo interativo com origem dos acessos"
-        />
+        >
+          <canvas
+            ref={canvasRef}
+            onPointerDown={onPointerDown}
+            onPointerMove={onPointerMove}
+            onPointerUp={onPointerUp}
+            onPointerLeave={onPointerUp}
+            className="block h-full w-full max-w-full"
+            style={{
+              touchAction: 'none',
+              cursor: isDragging ? 'grabbing' : 'grab',
+            }}
+            aria-label="Globo interativo com origem dos acessos"
+          />
+        </div>
         <div className="pointer-events-none absolute inset-0 flex items-center justify-center">
-          <div style={{ width: `${size}px`, height: `${size}px` }} className="relative">
-            {projectedMarkers.map((marker) => (
+          <div style={{ width: `${size}px`, height: `${size}px`, maxWidth: '100%' }} className="relative aspect-square">
+            {markers.map((m) => (
               <button
-                key={marker.id}
+                key={m.id}
+                ref={(el) => {
+                  const map = markerBtnRefs.current;
+                  if (el) map.set(m.id, el);
+                  else map.delete(m.id);
+                }}
                 type="button"
-                onMouseEnter={() => setHovered(marker)}
-                onMouseLeave={() => setHovered((prev) => (prev?.id === marker.id ? null : prev))}
+                onMouseEnter={() => {
+                  const meta: HoveredMarkerMeta = { id: m.id, label: m.label, count: m.count };
+                  hoveredRef.current = meta;
+                  setHovered(meta);
+                }}
+                onMouseLeave={() => {
+                  hoveredRef.current = null;
+                  setHovered(null);
+                }}
                 className="pointer-events-auto absolute rounded-full border border-cyan-200/60 bg-cyan-400/80 shadow-[0_0_16px_rgba(34,211,238,0.55)]"
                 style={{
-                  left: `${marker.x}px`,
-                  top: `${marker.y}px`,
-                  width: `${marker.sizePx}px`,
-                  height: `${marker.sizePx}px`,
+                  left: 0,
+                  top: 0,
+                  width: 12,
+                  height: 12,
+                  visibility: 'hidden',
                   transform: 'translate(-50%, -50%)',
                 }}
-                aria-label={`${marker.label}: ${marker.count} acessos`}
+                aria-label={`${m.label}: ${m.count} acessos`}
               />
             ))}
             {hovered ? (
               <div
+                ref={tooltipRef}
                 className="pointer-events-none absolute z-10 max-w-[220px] rounded-lg border border-zinc-700/80 bg-zinc-950/95 px-3 py-2 text-left shadow-xl"
-                style={{
-                  left: `${Math.min(size - 20, hovered.x + 14)}px`,
-                  top: `${Math.max(16, hovered.y - 10)}px`,
-                }}
+                style={{ visibility: 'hidden', left: 0, top: 0 }}
               >
                 <p className="text-xs font-semibold text-zinc-100">{hovered.label}</p>
                 <p className="mt-0.5 text-[11px] text-zinc-400">{hovered.count} acesso(s)</p>

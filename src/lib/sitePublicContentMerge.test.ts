@@ -36,9 +36,11 @@ describe('mergeFromFirestore', () => {
 });
 
 describe('getPublicContentFromDoc', () => {
-  it('com doc null devolve tudo vazio', () => {
+  it('com doc null devolve editorial vazio e política de privacidade por omissão', () => {
     const c = getPublicContentFromDoc(null);
     expect(c.brandName).toBe('');
+    expect(c.privacyPolicy.title).toBe('Política de privacidade');
+    expect(c.privacyPolicy.sections[0]?.title).toBe('1. Objetivo');
   });
   it('lê publicContent aninhado', () => {
     const doc: SiteCopyDoc = {
@@ -56,5 +58,18 @@ describe('mergeSitePublicContent', () => {
     expect(c.faq.title).toBe('F');
     expect(c.faq.items[0]!.q).toBe('1');
     expect(c.faq.items[2]).toBeDefined();
+  });
+  it('merge de privacyPolicy preserva nove secções', () => {
+    const c = mergeSitePublicContent({
+      privacyPolicy: {
+        title: 'Privacidade',
+        sections: [{ title: 'A', body: 'B' }],
+      },
+    });
+    expect(c.privacyPolicy.title).toBe('Privacidade');
+    expect(c.privacyPolicy.sections[0]!.title).toBe('A');
+    expect(c.privacyPolicy.sections[0]!.body).toBe('B');
+    expect(c.privacyPolicy.sections[8]).toBeDefined();
+    expect(c.privacyPolicy.sections[8]!.title).toBe('');
   });
 });
