@@ -1,10 +1,8 @@
 import { BrowserRouter, Navigate, Route, Routes } from 'react-router-dom';
 import { AdminRoute } from '@/components/auth/AdminRoute';
 import { GuestRoute } from '@/components/auth/GuestRoute';
-import { ContactDrawer } from '@/components/contact/ContactDrawer';
 import { WelcomeOverlay } from '@/components/WelcomeOverlay';
 import { AuthProvider } from '@/contexts/AuthProvider';
-import { ContactDrawerProvider } from '@/contexts/ContactDrawerProvider';
 import { SiteHealthBanner } from '@/components/SiteHealthBanner';
 import { SiteCopyProvider } from '@/contexts/SiteCopyProvider';
 import { ThemeProvider } from '@/contexts/ThemeProvider';
@@ -15,7 +13,7 @@ import { MainLayout } from '@/layouts/MainLayout';
 import { HomePage } from '@/pages/HomePage';
 import { AdminLoginPage } from '@/pages/admin/AdminLoginPage';
 import { AdminSiteContentPage } from '@/pages/admin/AdminSiteContentPage';
-import { AdminContactRequestsPage } from '@/pages/admin/AdminContactRequestsPage';
+import { AdminSiteAccessPage } from '@/pages/admin/AdminSiteAccessPage';
 import { ServicesCatalogPage } from '@/pages/ServicesCatalogPage';
 import { ServiceDetailPage } from '@/pages/ServiceDetailPage';
 
@@ -23,55 +21,53 @@ export default function App() {
   return (
     <SiteCopyProvider>
       <I18nProvider>
-        <ContactDrawerProvider>
-          <ThemeProvider>
-            <WelcomeLayoutProvider>
-              <AuthProvider>
-                <BrowserRouter>
-                  <SiteHealthBanner />
-                  <WelcomeOverlay />
-                  <ContactDrawer />
-                  <Routes>
-                    <Route element={<MainLayout />}>
-                      <Route path="/" element={<HomePage />} />
-                      <Route path="/servicos" element={<ServicesCatalogPage />} />
-                      <Route path="/servicos/:productId" element={<ServiceDetailPage />} />
-                    </Route>
+        <ThemeProvider>
+          <WelcomeLayoutProvider>
+            <AuthProvider>
+              <BrowserRouter>
+                <SiteHealthBanner />
+                <WelcomeOverlay />
+                <Routes>
+                  <Route element={<MainLayout />}>
+                    <Route path="/" element={<HomePage />} />
+                    <Route path="/servicos" element={<ServicesCatalogPage />} />
+                    <Route path="/servicos/:productId" element={<ServiceDetailPage />} />
+                  </Route>
 
+                  <Route
+                    path="/login"
+                    element={
+                      <GuestRoute>
+                        <AdminLoginPage />
+                      </GuestRoute>
+                    }
+                  />
+
+                  <Route
+                    element={
+                      <AdminRoute>
+                        <AdminLayout />
+                      </AdminRoute>
+                    }
+                  >
+                    <Route path="/admin" element={<Navigate to="/admin/home" replace />} />
+                    <Route path="/admin/home" element={<AdminSiteContentPage />} />
+                    <Route path="/admin/casos" element={<Navigate to="/admin/home" replace />} />
+                    <Route path="/admin/acessos" element={<AdminSiteAccessPage />} />
+                    <Route path="/admin/contatos" element={<Navigate to="/admin/acessos" replace />} />
+                    <Route path="/admin/produtos" element={<Navigate to="/admin/home" replace />} />
                     <Route
-                      path="/login"
-                      element={
-                        <GuestRoute>
-                          <AdminLoginPage />
-                        </GuestRoute>
-                      }
+                      path="/admin/conteudo"
+                      element={<Navigate to="/admin/home" replace />}
                     />
+                  </Route>
 
-                    <Route
-                      element={
-                        <AdminRoute>
-                          <AdminLayout />
-                        </AdminRoute>
-                      }
-                    >
-                      <Route path="/admin" element={<Navigate to="/admin/contatos" replace />} />
-                      <Route path="/admin/home" element={<AdminSiteContentPage />} />
-                      <Route path="/admin/casos" element={<Navigate to="/admin/home" replace />} />
-                      <Route path="/admin/contatos" element={<AdminContactRequestsPage />} />
-                      <Route path="/admin/produtos" element={<Navigate to="/admin/home" replace />} />
-                      <Route
-                        path="/admin/conteudo"
-                        element={<Navigate to="/admin/home" replace />}
-                      />
-                    </Route>
-
-                    <Route path="*" element={<Navigate to="/" replace />} />
-                  </Routes>
-                </BrowserRouter>
-              </AuthProvider>
-            </WelcomeLayoutProvider>
-          </ThemeProvider>
-        </ContactDrawerProvider>
+                  <Route path="*" element={<Navigate to="/" replace />} />
+                </Routes>
+              </BrowserRouter>
+            </AuthProvider>
+          </WelcomeLayoutProvider>
+        </ThemeProvider>
       </I18nProvider>
     </SiteCopyProvider>
   );

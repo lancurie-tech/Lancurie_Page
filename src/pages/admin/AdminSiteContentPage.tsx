@@ -2,7 +2,6 @@ import { useCallback, useEffect, useMemo, useRef, useState, type ReactNode } fro
 import { ChevronDown } from 'lucide-react';
 import { getDownloadURL, ref, uploadBytes } from 'firebase/storage';
 import type { SiteImageKey } from '@/data/siteImageConfig';
-import { usePublicSiteSettings } from '@/contexts/usePublicSiteSettings';
 import { useSiteCopy } from '@/contexts/useSiteCopy';
 import { firebaseReady, storage } from '@/lib/firebase/config';
 import { SITE_IMAGE_UPLOAD_MAX_BYTES, uploadSiteImageFile } from '@/lib/firebase/siteImageStorage';
@@ -42,7 +41,6 @@ function HomeContentAccordionSection({ title, description, children, defaultOpen
 
 export function AdminSiteContentPage() {
   const { doc, ready, loadError } = useSiteCopy();
-  const { contactEmail: liveContact, whatsappPhone: liveWhatsapp } = usePublicSiteSettings();
   const hydrated = useRef(false);
 
   const [draft, setDraft] = useState<AdminSiteDraft>(() => buildDraftFromDoc(null));
@@ -148,9 +146,6 @@ export function AdminSiteContentPage() {
       setHomeProductImageUploading((m) => ({ ...m, [index]: false }));
     }
   }, []);
-
-  const contactPreview = draft.contactEmail.trim() || liveContact;
-  const whatsappPreview = draft.whatsappPhone.replace(/\D/g, '') || liveWhatsapp;
 
   const mergedSiteImages = useMemo(
     () => mergeSiteImageOverrides(doc?.images, draft.images),
@@ -1038,8 +1033,6 @@ export function AdminSiteContentPage() {
               <div className="origin-top scale-[0.62] sm:scale-[0.78]">
           <HomePageView
             publicTextOverride={previewText}
-            contactEmail={contactPreview}
-            whatsappPhone={whatsappPreview}
             siteImageOverrides={mergedSiteImages}
             siteImageReady
           />
