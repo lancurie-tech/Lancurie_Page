@@ -1,7 +1,6 @@
 import {
   collection,
   doc,
-  getDoc,
   limit,
   onSnapshot,
   orderBy,
@@ -53,10 +52,9 @@ export function recordUniqueDailySiteVisit(
   if (!safeVisitor || !safeDay) return;
   const visitRef = doc(c, `${safeDay}__${safeVisitor}`);
 
-  void getDoc(visitRef)
-    .then((snap) => {
-      if (snap.exists()) return;
-      return setDoc(visitRef, {
+  void setDoc(
+    visitRef,
+    {
         path: normalizedPath,
         dayKey,
         visitorId,
@@ -71,8 +69,9 @@ export function recordUniqueDailySiteVisit(
             }
           : null,
         createdAt: serverTimestamp(),
-      });
-    })
+    },
+    { merge: true }
+  )
     .catch(() => {
       /* evita ruído no console em ambientes sem regra/deploy */
     });
