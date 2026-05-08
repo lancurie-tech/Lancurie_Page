@@ -259,7 +259,7 @@ export function AdminSiteAccessPage() {
       </div>
 
       <div className="space-y-3">
-        <WorldAccessMap points={geoPoints} />
+        <WorldAccessMap points={geoPoints} totalVisits={filteredItems.length} />
         <div className="rounded-xl border border-zinc-800 bg-zinc-900/20 p-4">
           <h3 className="text-xs font-semibold uppercase tracking-wide text-zinc-500">Top locais</h3>
           {topLocations.length > 0 ? (

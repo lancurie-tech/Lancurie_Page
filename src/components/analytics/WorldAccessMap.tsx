@@ -13,6 +13,7 @@ type GeoPoint = {
 
 type WorldAccessMapProps = {
   points: GeoPoint[];
+  totalVisits: number;
 };
 
 type GlobeMarker = {
@@ -74,7 +75,7 @@ function projectMarker(
   };
 }
 
-export function WorldAccessMap({ points }: WorldAccessMapProps) {
+export function WorldAccessMap({ points, totalVisits }: WorldAccessMapProps) {
   const containerRef = useRef<HTMLDivElement | null>(null);
   const canvasRef = useRef<HTMLCanvasElement | null>(null);
   const phiRef = useRef(0.35);
@@ -234,7 +235,10 @@ export function WorldAccessMap({ points }: WorldAccessMapProps) {
     <div className="rounded-2xl border border-zinc-800 bg-zinc-900/20 p-4 sm:p-6">
       <div className="flex items-center justify-between gap-3">
         <h2 className="text-sm font-medium uppercase tracking-wide text-zinc-500">Origem dos acessos no mundo</h2>
-        <p className="text-xs text-zinc-500">{points.length} ponto(s) geolocalizado(s)</p>
+        <div className="text-right">
+          <p className="text-xs text-zinc-500">Total na base: {totalVisits}</p>
+          <p className="text-xs text-zinc-500">{points.length} ponto(s) geolocalizado(s)</p>
+        </div>
       </div>
 
       <div

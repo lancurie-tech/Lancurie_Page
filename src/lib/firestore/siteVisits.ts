@@ -55,7 +55,31 @@ export function recordUniqueDailySiteVisit(
 
   void getDoc(visitRef)
     .then((snap) => {
-      if (snap.exists()) return;
+      if (snap.exists()) {
+        if (!geo) return;
+        const data = snap.data() as { geo?: unknown } | undefined;
+        const hasGeo =
+          Boolean(data?.geo) &&
+          typeof data?.geo === 'object' &&
+          data?.geo !== null &&
+          typeof (data.geo as { latitude?: unknown }).latitude === 'number' &&
+          typeof (data.geo as { longitude?: unknown }).longitude === 'number';
+        if (hasGeo) return;
+        return setDoc(
+          visitRef,
+          {
+            geo: {
+              city: geo.city,
+              region: geo.region,
+              country: geo.country,
+              countryCode: geo.countryCode,
+              latitude: geo.latitude,
+              longitude: geo.longitude,
+            },
+          },
+          { merge: true }
+        );
+      }
       return setDoc(visitRef, {
         path: normalizedPath,
         dayKey,
