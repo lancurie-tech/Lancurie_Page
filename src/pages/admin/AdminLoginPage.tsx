@@ -94,14 +94,15 @@ export function AdminLoginPage() {
           <div>
             <label
               htmlFor="login-email"
-              className="block text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-zinc-500"
+              className="block text-xs font-semibold tracking-[0.08em] text-zinc-300"
             >
-              {p.login.emailLabel}
+              {p.login.emailLabel || 'Email'}
             </label>
             <input
               id="login-email"
               type="email"
               autoComplete="username"
+              placeholder={p.login.emailLabel || 'Email'}
               value={email}
               onChange={(ev) => setEmail(ev.target.value)}
               required
@@ -111,14 +112,15 @@ export function AdminLoginPage() {
           <div>
             <label
               htmlFor="login-password"
-              className="block text-[0.65rem] font-semibold uppercase tracking-[0.14em] text-zinc-500"
+              className="block text-xs font-semibold tracking-[0.08em] text-zinc-300"
             >
-              {p.login.passwordLabel}
+              {p.login.passwordLabel || 'Senha'}
             </label>
             <input
               id="login-password"
               type="password"
               autoComplete="current-password"
+              placeholder={p.login.passwordLabel || 'Senha'}
               value={password}
               onChange={(ev) => setPassword(ev.target.value)}
               required
