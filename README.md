@@ -1,6 +1,6 @@
 # Lancurie Technology — site institucional
 
-SPA **Vite + React 19 + TypeScript + Tailwind CSS 4** com **Firebase** (Auth, Firestore, Hosting). Deploy automático com **GitHub Actions** para **dois projetos Firebase** (desenvolvimento e produção), com bases de dados separadas. A interface pública usa **apenas tema escuro** (não segue `prefers-color-scheme`).
+SPA **Vite + React 19 + TypeScript + Tailwind CSS 4** com **Firebase** (Auth, Firestore, Hosting). Deploy automático com **GitHub Actions** usando branch `dev` para validação, preview em PR para `main` e deploy de produção apenas na `main`. A interface pública usa **apenas tema escuro** (não segue `prefers-color-scheme`).
 
 ## Funcionalidades
 
@@ -23,11 +23,14 @@ npm run dev
 
 | Comando | Modo Vite | Firebase típico | Notas |
 |--------|------------|------------------|--------|
-| `npm run dev` | `development` | **Dev** (via `.env.development`) | Uso diário; HMR ativo. |
-| `npm run prod` | `production` | **Prod** (via `.env.production` / `.env.production.local`) | **Cuidado:** lê/escreve no projeto real. Só para debug pontual. |
+| `npm run dev` | `development` | Projeto configurado em `.env.development` | Uso diário; HMR ativo. |
+| `npm run dev:prod` | `production` | **Prod** (via `.env.production` / `.env.production.local`) | Servidor local em modo produção; **cuidado** com dados reais. |
+| `npm run prod` | `production` | **Prod** | Alias de compatibilidade para `npm run dev:prod`. |
 | `npm run build` | `production` | Conforme `.env.production*` | Build de produção (como na `main` na CI). |
-| `npm run build:dev` | `development` | Conforme `.env.development` | Build alinhado ao ambiente dev na CI. |
+| `npm run build:prod` | `production` | Conforme `.env.production*` | Alias explícito para build de produção. |
+| `npm run build:dev` | `development` | Conforme `.env.development` | Build local em modo development. |
 | `npm run preview` | — | Serve a pasta `dist` gerada pelo último build | |
+| `npm run preview:prod` | `production` | Conforme `.env.production*` | Faz build de produção e sobe preview local em sequência. |
 | `npm run lint` | — | — | ESLint. |
 
 ## Variáveis de ambiente
@@ -45,7 +48,7 @@ O cliente só expõe variáveis com prefixo **`VITE_`** (ver `src/lib/firebase/c
 ### Modelos no repositório
 
 - **`.env.example`** — visão geral e estratégia de ambientes.
-- **`.env.development.example`** → copiar para `.env.development` com credenciais do projeto Firebase **dev**.
+- **`.env.development.example`** → copiar para `.env.development` com as credenciais que deseja usar no desenvolvimento local.
 - **`.env.production.example`** → copiar para `.env.production` ou `.env.production.local` se precisares de build/servidor local contra **prod** (raro).
 
 ### Variáveis Firebase (sempre estes nomes no cliente)
@@ -54,44 +57,42 @@ O cliente só expõe variáveis com prefixo **`VITE_`** (ver `src/lib/firebase/c
 |----------|-----------|
 | `VITE_FIREBASE_API_KEY` | Chave Web do projeto Firebase. |
 | `VITE_FIREBASE_AUTH_DOMAIN` | Domínio Auth. |
-| `VITE_FIREBASE_PROJECT_ID` | ID do projeto (ex.: `lancurie` ou `lancurie-dev`). |
+| `VITE_FIREBASE_PROJECT_ID` | ID do projeto (ex.: `lancurie`). |
 | `VITE_FIREBASE_STORAGE_BUCKET` | Bucket Storage (se usado). |
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | Sender ID. |
 | `VITE_FIREBASE_APP_ID` | App ID da app Web. |
 | `VITE_CONTACT_EMAIL` | E-mail na secção de contacto (opcional). |
 
-Na **CI**, o job **dev** usa secrets com sufixo **`_DEV`** (ex.: `VITE_FIREBASE_API_KEY_DEV`); o workflow mapeia os valores para `VITE_FIREBASE_*` durante o build. O job **prod** usa secrets **sem** sufixo.
+Na **CI**, os jobs usam os secrets de produção (**sem sufixo `_DEV`**) para validar build/lint, gerar preview no PR para `main` e fazer deploy live apenas na `main`.
 
 ## Fluxo Git recomendado
 
-1. Branch de trabalho → **merge para `dev`** → deploy e testes no **Firebase dev** (Hosting live + Firestore desse projeto).
-2. Quando estiver validado → **merge `dev` → `main`** → deploy no **Firebase prod**.
-
-Assim o tráfego e os dados de desenvolvimento não misturam com produção.
+1. Branch de trabalho → **merge para `dev`** → validação (lint + build), sem deploy.
+2. **PR `dev` → `main`** → validação + preview de Hosting.
+3. Merge na **`main`** → deploy live no Firebase de produção.
 
 ## Deploy (Firebase Hosting + Firestore)
 
 ### Conceito
 
 - **Produção:** projeto Firebase **`lancurie`** (ou o ID definido na variável `FIREBASE_PROJECT_PROD`).
-- **Desenvolvimento:** segundo projeto Firebase (**ex.: `lancurie-dev`**) com Auth, Firestore e Hosting próprios (ou o ID em `FIREBASE_PROJECT_DEV`).
+- **Desenvolvimento:** branch de integração `dev` usada para validação contínua (sem deploy live).
 
 Ficheiros relevantes:
 
 - **`firebase.json`** — Hosting (`public: dist`, rewrite SPA para `/index.html`) + Firestore (`rules`, `indexes`).
-- **`.firebaserc`** — aliases `prod` e `dev` para os IDs GCP.
+- **`.firebaserc`** — alias `prod` (e `default`) para o ID GCP principal.
 
 ### GitHub Actions — `.github/workflows/deploy.yml`
 
 | Evento | Job | O que faz |
 |--------|-----|-----------|
-| **Push** ou **workflow_dispatch** na branch **`dev`** | Dev | Build com secrets `*_DEV` → Hosting **live** no projeto dev → `firebase deploy --only firestore` no projeto dev. |
-| **Push** ou **workflow_dispatch** na **`main`** | Produção | Build com secrets de prod → Hosting **live** em prod → Firestore em prod. |
-| **PR** com base em **`main`** ou **`dev`** | Dev | Build com secrets **dev** → **preview** de Hosting só no projeto **dev** (URL no log / comentário no PR). |
+| **Push** ou **workflow_dispatch** na branch **`dev`** | Validate | `npm ci`, `npm run lint`, `npm run build` (sem deploy). |
+| **PR** com base em **`main`** | Validate + Preview | validação + **preview** de Hosting (URL no log / comentário no PR). |
+| **Push** ou **workflow_dispatch** na **`main`** | Validate + Produção | validação + Hosting **live** em prod + deploy de Firestore/Storage rules em prod. |
 
-Variáveis de repositório opcionais (**Settings → Secrets and variables → Actions → Variables**):
+Variável de repositório opcional (**Settings → Secrets and variables → Actions → Variables**):
 
-- **`FIREBASE_PROJECT_DEV`** — ID do projeto dev (por defeito no YAML: `lancurie-dev`).
 - **`FIREBASE_PROJECT_PROD`** — ID de produção (por defeito: `lancurie`).
 
 ### Secrets no GitHub (**Settings → Secrets and variables → Actions**)
@@ -108,24 +109,12 @@ Variáveis de repositório opcionais (**Settings → Secrets and variables → A
 | `VITE_FIREBASE_MESSAGING_SENDER_ID` | … |
 | `VITE_FIREBASE_APP_ID` | … |
 
-**Desenvolvimento** (`dev` e PRs):
-
-| Secret | Conteúdo |
-|--------|------------|
-| `FIREBASE_SERVICE_ACCOUNT_DEV` | JSON completo da chave no **projeto dev** (não um fragmento nem só o e-mail). |
-| `VITE_FIREBASE_API_KEY_DEV` | … |
-| `VITE_FIREBASE_AUTH_DOMAIN_DEV` | … |
-| `VITE_FIREBASE_PROJECT_ID_DEV` | … |
-| `VITE_FIREBASE_STORAGE_BUCKET_DEV` | … |
-| `VITE_FIREBASE_MESSAGING_SENDER_ID_DEV` | … |
-| `VITE_FIREBASE_APP_ID_DEV` | … |
-
 ### Permissões IAM (Google Cloud) para a CI
 
 A conta de serviço usada em cada projeto (campo `client_email` do JSON) precisa de conseguir:
 
 - **Hosting** — deploy (a chave gerada no Firebase costuma bastar para Hosting).
-- **Firestore** — o passo `firebase deploy --only firestore` chama a API **Service Usage**; se aparecer **403** ao “ensuring API”, no **IAM** do projeto (**Lancurie Dev** ou **prod**) edita essa conta e adiciona, no mínimo para ambiente dev:
+- **Firestore** — o passo `firebase deploy --only firestore` chama a API **Service Usage**; se aparecer **403** ao “ensuring API”, no **IAM** do projeto (**prod**) edita essa conta e adiciona:
   - **Editor** (`roles/editor`), **ou**
   - **Visualizador do Service Usage** + **Administrador do Firebase** (papéis mais granulares).
 
@@ -135,7 +124,7 @@ O workflow declara `checks: write` para a action `FirebaseExtended/action-hostin
 
 ### Execução manual
 
-**Actions** → workflow **Deploy Firebase (dev + prod)** → **Run workflow** (escolhe a branch **`dev`** ou **`main`** conforme o ambiente).
+**Actions** → workflow **CI + Deploy Firebase** → **Run workflow** (escolhe a branch **`dev`** para validar ou **`main`** para deploy).
 
 ## CI — `.github/workflows/ci.yml`
 
@@ -146,11 +135,11 @@ Em **push** e **PR** para **`main`** e **`dev`**: `npm ci`, `npm run lint`, `npm
 Na raiz do repo, com [Firebase CLI](https://firebase.google.com/docs/cli) instalada e login:
 
 ```bash
-firebase deploy --only hosting --project lancurie-dev
-firebase deploy --only firestore --project lancurie-dev
+firebase deploy --only hosting --project lancurie
+firebase deploy --only firestore --project lancurie
 ```
 
-Sem `--project`, o CLI usa o alias **default** em `.firebaserc` (hoje **prod** `lancurie`). Para **dev**, usa sempre o ID ou `firebase use dev` se o alias estiver correto.
+Sem `--project`, o CLI usa o alias **default** em `.firebaserc` (hoje `lancurie`).
 
 ## `vercel.json`
 

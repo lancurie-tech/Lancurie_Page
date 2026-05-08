@@ -6,13 +6,16 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "prod": "vite --mode production",
+    "dev:prod": "vite --mode production",
+    "prod": "npm run dev:prod",
     "build": "tsc -b && vite build",
+    "build:prod": "npm run build",
     "build:dev": "tsc -b && vite build --mode development",
     "lint": "eslint .",
     "test": "vitest run",
     "test:watch": "vitest",
     "preview": "vite preview",
+    "preview:prod": "npm run build && vite preview",
     "seed:export": "tsx scripts/emit-firebase-seed.ts"
   },
   "dependencies": {
