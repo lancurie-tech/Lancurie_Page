@@ -43,13 +43,47 @@ service cloud.firestore {
     }
 
     match /siteVisits/{visitId} {
-      allow create: if request.resource.data.keys().hasOnly(['path', 'createdAt'])
+      function validGeoData() {
+        return request.resource.data.geo == null
+          || (
+            request.resource.data.geo is map
+            && request.resource.data.geo.keys().hasOnly([
+              'city',
+              'region',
+              'country',
+              'countryCode',
+              'latitude',
+              'longitude'
+            ])
+            && (request.resource.data.geo.city == null || request.resource.data.geo.city is string)
+            && (request.resource.data.geo.region == null || request.resource.data.geo.region is string)
+            && (request.resource.data.geo.country == null || request.resource.data.geo.country is string)
+            && (request.resource.data.geo.countryCode == null || request.resource.data.geo.countryCode is string)
+            && request.resource.data.geo.latitude is number
+            && request.resource.data.geo.longitude is number
+          );
+      }
+
+      allow create, update: if request.resource.data.keys().hasOnly([
+          'path',
+          'createdAt',
+          'dayKey',
+          'visitorId',
+          'geo'
+        ])
         && request.resource.data.path is string
         && request.resource.data.path.size() >= 1
         && request.resource.data.path.size() <= 400
-        && request.resource.data.createdAt == request.time;
+        && request.resource.data.dayKey is string
+        && request.resource.data.dayKey.size() >= 8
+        && request.resource.data.dayKey.size() <= 20
+        && request.resource.data.visitorId is string
+        && request.resource.data.visitorId.size() >= 8
+        && request.resource.data.visitorId.size() <= 120
+        && request.resource.data.createdAt == request.time
+        && validGeoData();
       allow read: if isAdmin();
-      allow update, delete: if false;
+      allow delete: if false;
     }
 
     match /contactRequests/{requestId} {
