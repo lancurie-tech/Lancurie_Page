@@ -1,17 +1,20 @@
 import {
-  addDoc,
   collection,
+  doc,
+  getDoc,
   limit,
   onSnapshot,
   orderBy,
   query,
   serverTimestamp,
+  setDoc,
   Timestamp,
   where,
   type Unsubscribe,
 } from 'firebase/firestore';
 import { db } from '@/lib/firebase/config';
 import type { SiteVisit } from '@/types/siteVisit';
+import type { VisitorGeo } from '@/lib/geo/visitorGeo';
 
 export const SITE_VISITS_COLLECTION = 'siteVisits';
 
@@ -28,19 +31,51 @@ function normalizePath(path: string): string {
   return t.startsWith('/') ? t : `/${t}`;
 }
 
+function normalizeKeyPart(value: string): string {
+  return value.replace(/[^a-zA-Z0-9_-]/g, '_').slice(0, 120);
+}
+
 /**
- * Regista uma visualização de página no site público (SPA).
+ * Regista no máximo 1 acesso por visitante por dia (fuso SP controlado no caller).
  * Falha em silêncio se o Firestore não estiver configurado ou a escrita for rejeitada.
  */
-export function recordSitePageView(path: string): void {
+export function recordUniqueDailySiteVisit(
+  path: string,
+  visitorId: string,
+  dayKey: string,
+  geo?: VisitorGeo | null
+): void {
   const c = colRef();
   if (!c) return;
-  void addDoc(c, {
-    path: normalizePath(path),
-    createdAt: serverTimestamp(),
-  }).catch(() => {
-    /* evita ruído no console em ambientes sem regra/deploy */
-  });
+  const normalizedPath = normalizePath(path);
+  const safeVisitor = normalizeKeyPart(visitorId);
+  const safeDay = normalizeKeyPart(dayKey);
+  if (!safeVisitor || !safeDay) return;
+  const visitRef = doc(c, `${safeDay}__${safeVisitor}`);
+
+  void getDoc(visitRef)
+    .then((snap) => {
+      if (snap.exists()) return;
+      return setDoc(visitRef, {
+        path: normalizedPath,
+        dayKey,
+        visitorId,
+        geo: geo
+          ? {
+              city: geo.city,
+              region: geo.region,
+              country: geo.country,
+              countryCode: geo.countryCode,
+              latitude: geo.latitude,
+              longitude: geo.longitude,
+            }
+          : null,
+        createdAt: serverTimestamp(),
+      });
+    })
+    .catch(() => {
+      /* evita ruído no console em ambientes sem regra/deploy */
+    });
 }
 
 export function subscribeSiteVisitsSince(

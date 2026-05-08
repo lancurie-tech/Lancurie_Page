@@ -1,316 +1,59 @@
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion, useReducedMotion } from 'framer-motion';
-import { MessageCircle, Send, X } from 'lucide-react';
+import { useMemo } from 'react';
+import { motion, useReducedMotion } from 'framer-motion';
 import { usePublicSiteSettings } from '@/contexts/usePublicSiteSettings';
-import { useSiteImageUrl } from '@/hooks/useSiteImage';
 import { cn } from '@/lib/cn';
 
 const WHATSAPP_INTRO = 'Olá, gostaria de saber mais sobre os serviços da Lancurie.';
 
-type ChatEntry =
-  | { id: string; role: 'user'; text: string }
-  | { id: string; role: 'assistant'; text: string; showWhatsapp?: boolean; whatsappPrefill?: string };
-
-const INITIAL_MESSAGES: ChatEntry[] = [
-  { id: 'welcome', role: 'assistant', text: 'Qual é a sua dúvida?' },
-];
-
-function newId(): string {
-  if (typeof crypto !== 'undefined' && 'randomUUID' in crypto) return crypto.randomUUID();
-  return `${Date.now()}-${Math.random().toString(16).slice(2)}`;
-}
-
-function freshInitialMessages(): ChatEntry[] {
-  return INITIAL_MESSAGES.map((m) => ({ ...m }));
-}
-
 export function ChatLauncher() {
   const { whatsappPhone } = usePublicSiteSettings();
   const reduceMotion = useReducedMotion();
-  const avatarSrc = useSiteImageUrl('footerFavicon');
-  const panelId = useId();
-
-  const [open, setOpen] = useState(false);
-  const [messages, setMessages] = useState<ChatEntry[]>(() => freshInitialMessages());
-  const [draft, setDraft] = useState('');
-  const buttonRef = useRef<HTMLButtonElement | null>(null);
-  const closeRef = useRef<HTMLButtonElement | null>(null);
-  const scrollRef = useRef<HTMLDivElement | null>(null);
-  const inputRef = useRef<HTMLInputElement | null>(null);
-
-  const whatsappHrefFor = useMemo(
-    () => (extraUserLine?: string) => {
-      if (!whatsappPhone) return '';
-      const body =
-        extraUserLine && extraUserLine.trim().length > 0
-          ? `${WHATSAPP_INTRO}\n\nMinha dúvida: ${extraUserLine.trim()}`
-          : WHATSAPP_INTRO;
-      return `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(body)}`;
-    },
-    [whatsappPhone]
-  );
-
-  const openChatPanel = useCallback(() => {
-    setMessages(freshInitialMessages());
-    setDraft('');
-    setOpen(true);
-  }, []);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const handle = () => openChatPanel();
-    window.addEventListener('lancurie:open-chat', handle);
-    return () => window.removeEventListener('lancurie:open-chat', handle);
-  }, [openChatPanel]);
-
-  useEffect(() => {
-    if (!open) return;
-    const onKey = (event: KeyboardEvent) => {
-      if (event.key === 'Escape') {
-        event.stopPropagation();
-        setOpen(false);
-        buttonRef.current?.focus();
-      }
-    };
-    window.addEventListener('keydown', onKey);
-    closeRef.current?.focus({ preventScroll: true });
-    return () => window.removeEventListener('keydown', onKey);
-  }, [open]);
-
-  useEffect(() => {
-    if (!open) return;
-    const el = scrollRef.current;
-    if (!el) return;
-    el.scrollTo({
-      top: el.scrollHeight,
-      behavior: reduceMotion ? 'auto' : 'smooth',
-    });
-  }, [messages, open, reduceMotion]);
-
-  useEffect(() => {
-    if (!open) return;
-    const t = window.setTimeout(() => inputRef.current?.focus({ preventScroll: true }), 120);
-    return () => window.clearTimeout(t);
-  }, [open]);
-
-  function sendMessage() {
-    const text = draft.trim();
-    if (!text) return;
-
-    const userLine = text;
-    setDraft('');
-    setMessages((prev) => [
-      ...prev,
-      { id: newId(), role: 'user', text: userLine },
-      {
-        id: newId(),
-        role: 'assistant',
-        text: 'Entre em contato pelo nosso WhatsApp.',
-        showWhatsapp: true,
-        whatsappPrefill: userLine,
-      },
-    ]);
-  }
+  const whatsappHref = useMemo(() => {
+    if (!whatsappPhone) return '';
+    return `https://wa.me/${whatsappPhone}?text=${encodeURIComponent(WHATSAPP_INTRO)}`;
+  }, [whatsappPhone]);
 
   if (!whatsappPhone) return null;
 
   return (
     <div
       className="pointer-events-none fixed inset-x-0 bottom-0 z-50 flex justify-end px-4 pb-[max(1rem,env(safe-area-inset-bottom,0px))] sm:px-6 sm:pb-6"
-      aria-live="polite"
+      aria-live="off"
     >
-      <div className="pointer-events-auto relative flex w-full max-w-[min(100%,20rem)] flex-col items-end gap-2.5 sm:max-w-88">
-        <AnimatePresence initial={false}>
-          {open ? (
-            <motion.div
-              key="chat-panel"
-              id={panelId}
-              role="dialog"
-              aria-modal="true"
-              aria-label="Chat Lancurie"
-              initial={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 12, scale: 0.96 }}
-              animate={reduceMotion ? { opacity: 1 } : { opacity: 1, y: 0, scale: 1 }}
-              exit={reduceMotion ? { opacity: 0 } : { opacity: 0, y: 8, scale: 0.97 }}
-              transition={{ duration: reduceMotion ? 0.18 : 0.32, ease: [0.22, 1, 0.36, 1] }}
-              className={cn(
-                'relative flex min-h-67 max-h-[min(26rem,62vh)] w-full flex-col overflow-hidden rounded-xl border border-zinc-700/70 bg-[#12131a] text-[13px] leading-snug antialiased shadow-[0_24px_56px_-20px_rgba(0,0,0,0.82)] sm:min-h-70'
-              )}
-            >
-              <header className="flex shrink-0 items-center justify-between gap-3 border-b border-zinc-800/90 px-3 py-2.5 sm:px-4">
-                <div className="flex min-w-0 items-center gap-2.5">
-                  <span className="flex h-8 w-8 shrink-0 items-center justify-center rounded-full border border-white/8 bg-zinc-950 p-0.5">
-                    {avatarSrc ? (
-                      <img src={avatarSrc} alt="" className="h-7 w-7 rounded-full object-cover" />
-                    ) : (
-                      <MessageCircle className="h-3.5 w-3.5 text-zinc-400" strokeWidth={1.75} aria-hidden />
-                    )}
-                  </span>
-                  <div className="min-w-0">
-                    <p className="text-[0.8125rem] font-semibold leading-none tracking-tight text-zinc-100">
-                      Lancurie
-                    </p>
-                    <p className="mt-0.5 text-[0.625rem] font-medium uppercase tracking-[0.14em] text-zinc-500">
-                      Assistente
-                    </p>
-                  </div>
-                </div>
-                <button
-                  ref={closeRef}
-                  type="button"
-                  onClick={() => {
-                    setOpen(false);
-                    buttonRef.current?.focus();
-                  }}
-                  aria-label="Fechar chat"
-                  className="-m-0.5 rounded-full p-1 text-zinc-500 transition-colors hover:bg-white/4 hover:text-zinc-200 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-400/50"
-                >
-                  <X className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                </button>
-              </header>
-
-              <div
-                ref={scrollRef}
-                className="min-h-0 flex-1 space-y-2 overflow-y-auto px-3 pb-5 pt-3 sm:px-3.5 sm:pb-6 [scrollbar-width:thin]"
-                role="log"
-                aria-label="Mensagens da conversa"
-              >
-                {messages.map((msg) => (
-                  <div
-                    key={msg.id}
-                    className={cn('flex', msg.role === 'user' ? 'justify-end' : 'justify-start')}
-                  >
-                    {msg.role === 'user' ? (
-                      <div
-                        className={cn(
-                          'max-w-[min(100%,88%)] rounded-[14px] rounded-br-[4px] border border-zinc-600/35',
-                          'bg-zinc-800/55 px-2.5 py-2 text-[13px] leading-[1.45] text-zinc-100'
-                        )}
-                      >
-                        {msg.text}
-                      </div>
-                    ) : (
-                      <div
-                        className={cn(
-                          'max-w-[min(100%,92%)] rounded-[14px] rounded-bl-[4px] border border-zinc-700/55',
-                          'bg-zinc-900/65 px-2.5 py-2 text-[13px] leading-[1.45] text-zinc-200'
-                        )}
-                      >
-                        <p className="font-normal">{msg.text}</p>
-                        {msg.showWhatsapp ? (
-                          <a
-                            href={whatsappHrefFor(msg.whatsappPrefill)}
-                            target="_blank"
-                            rel="noreferrer"
-                            onClick={() => setOpen(false)}
-                            className={cn(
-                              'mt-2 inline-flex w-full items-center justify-center gap-1.5 rounded-lg border border-emerald-600/35',
-                              'bg-emerald-700/85 px-2.5 py-1.5 text-[11px] font-medium text-emerald-50 transition-colors',
-                              'hover:bg-emerald-600 focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-400/45'
-                            )}
-                          >
-                            <MessageCircle className="h-3 w-3 shrink-0 opacity-95" strokeWidth={2} aria-hidden />
-                            <span>Abrir WhatsApp</span>
-                          </a>
-                        ) : null}
-                      </div>
-                    )}
-                  </div>
-                ))}
-              </div>
-
-              <form
-                className="shrink-0 border-t border-zinc-800/90 bg-[#0e0f14] px-3 pb-2.5 pt-2 sm:px-3.5 sm:pb-3"
-                onSubmit={(e) => {
-                  e.preventDefault();
-                  sendMessage();
-                }}
-              >
-                <div className="flex items-end gap-1.5">
-                  <input
-                    ref={inputRef}
-                    type="text"
-                    value={draft}
-                    onChange={(e) => setDraft(e.target.value)}
-                    placeholder="Escreva sua mensagem…"
-                    autoComplete="off"
-                    aria-label="Sua mensagem"
-                    className={cn(
-                      'min-h-9 flex-1 rounded-lg border border-zinc-700/65 bg-zinc-900/80 px-2.5 py-2 text-[13px] text-zinc-100',
-                      'placeholder:text-zinc-600 focus-visible:border-zinc-500 focus-visible:outline-hidden focus-visible:ring-1 focus-visible:ring-cyan-500/25'
-                    )}
-                  />
-                  <button
-                    type="submit"
-                    aria-label="Enviar mensagem"
-                    disabled={!draft.trim()}
-                    className={cn(
-                      'flex h-9 w-9 shrink-0 items-center justify-center rounded-lg bg-emerald-700 text-white transition-colors',
-                      'hover:bg-emerald-600 disabled:pointer-events-none disabled:opacity-35',
-                      'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-400/40'
-                    )}
-                  >
-                    <Send className="h-3.5 w-3.5" strokeWidth={2} aria-hidden />
-                  </button>
-                </div>
-              </form>
-            </motion.div>
-          ) : null}
-        </AnimatePresence>
-
-        <motion.button
-          ref={buttonRef}
-          type="button"
-          onClick={() => (open ? setOpen(false) : openChatPanel())}
-          aria-label={open ? 'Fechar chat Lancurie' : 'Abrir chat Lancurie'}
-          aria-expanded={open}
-          aria-controls={panelId}
+      <div className="pointer-events-auto relative flex w-full max-w-[min(100%,20rem)] flex-col items-end sm:max-w-88">
+        <motion.a
+          href={whatsappHref}
+          target="_blank"
+          rel="noreferrer"
+          aria-label="Abrir WhatsApp da Lancurie"
+          title="Falar no WhatsApp"
           initial={false}
           whileHover={reduceMotion ? undefined : { scale: 1.05 }}
           whileTap={reduceMotion ? undefined : { scale: 0.95 }}
           transition={{ type: 'spring', stiffness: 380, damping: 26 }}
           className={cn(
-            'relative flex h-12 w-12 shrink-0 items-center justify-center rounded-full border border-white/10',
-            'bg-linear-to-br from-[#0c1628] via-[#0a1322] to-[#060a14] text-zinc-100',
-            'shadow-[0_18px_48px_-16px_rgba(2,6,15,0.85),0_4px_14px_-6px_rgba(34,211,238,0.35)]',
-            'transition-colors duration-300 hover:border-cyan-300/40 hover:text-white',
-            'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-cyan-300/70'
+            'relative flex h-13 w-13 shrink-0 items-center justify-center rounded-full border border-emerald-300/25',
+            'bg-linear-to-br from-[#22c55e] via-[#1fb455] to-[#159947] text-white',
+            'shadow-[0_18px_48px_-16px_rgba(12,78,39,0.65),0_4px_14px_-6px_rgba(74,222,128,0.55)]',
+            'transition-colors duration-300 hover:from-[#25d366] hover:to-[#1aa44f]',
+            'focus-visible:outline-hidden focus-visible:ring-2 focus-visible:ring-emerald-300/80'
           )}
         >
-          {!open && !reduceMotion ? (
+          {!reduceMotion ? (
             <motion.span
-              className="pointer-events-none absolute inset-0 rounded-full bg-cyan-400/25"
+              className="pointer-events-none absolute inset-0 rounded-full bg-emerald-300/30"
               initial={{ opacity: 0.55, scale: 1 }}
               animate={{ opacity: [0.55, 0, 0.55], scale: [1, 1.45, 1] }}
               transition={{ duration: 2.6, ease: 'easeOut', repeat: Infinity }}
               aria-hidden
             />
           ) : null}
-          <AnimatePresence mode="wait" initial={false}>
-            {open ? (
-              <motion.span
-                key="icon-x"
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: -90 }}
-                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, rotate: 0 }}
-                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: 90 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="relative"
-              >
-                <X className="h-5 w-5" strokeWidth={1.8} aria-hidden />
-              </motion.span>
-            ) : (
-              <motion.span
-                key="icon-chat"
-                initial={reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: 90 }}
-                animate={reduceMotion ? { opacity: 1 } : { opacity: 1, rotate: 0 }}
-                exit={reduceMotion ? { opacity: 0 } : { opacity: 0, rotate: -90 }}
-                transition={{ duration: 0.2, ease: 'easeOut' }}
-                className="relative"
-              >
-                <MessageCircle className="h-5 w-5" strokeWidth={1.7} aria-hidden />
-              </motion.span>
-            )}
-          </AnimatePresence>
-        </motion.button>
+          <span className="relative" aria-hidden>
+            <svg viewBox="0 0 24 24" className="h-6 w-6 fill-white">
+              <path d="M19.05 4.94A9.94 9.94 0 0 0 12.02 2c-5.5 0-9.97 4.47-9.97 9.98a9.93 9.93 0 0 0 1.35 5.01L2 22l5.13-1.34a9.9 9.9 0 0 0 4.89 1.25h.01c5.5 0 9.97-4.48 9.97-9.98a9.9 9.9 0 0 0-2.95-6.99Zm-7.03 15.29h-.01a8.3 8.3 0 0 1-4.23-1.16l-.3-.18-3.04.79.81-2.96-.2-.31a8.32 8.32 0 0 1-1.28-4.43c0-4.61 3.75-8.36 8.37-8.36 2.23 0 4.33.87 5.9 2.45a8.3 8.3 0 0 1 2.45 5.9c0 4.62-3.76 8.36-8.37 8.36Zm4.59-6.26c-.25-.13-1.47-.73-1.69-.82-.23-.08-.39-.13-.56.13-.16.25-.64.82-.78.98-.14.17-.28.19-.53.07-.25-.13-1.05-.39-2-1.24a7.43 7.43 0 0 1-1.39-1.72c-.15-.26-.01-.4.11-.53.11-.11.25-.28.38-.42.13-.14.17-.25.25-.41.08-.17.04-.31-.02-.44-.06-.13-.56-1.35-.77-1.85-.2-.48-.4-.42-.56-.42h-.48c-.17 0-.44.07-.67.32-.23.25-.88.86-.88 2.1s.91 2.44 1.04 2.61c.13.17 1.79 2.73 4.33 3.83.6.26 1.08.42 1.45.53.61.19 1.16.16 1.6.1.49-.07 1.47-.6 1.67-1.18.21-.59.21-1.09.15-1.19-.06-.09-.23-.14-.48-.27Z" />
+            </svg>
+          </span>
+        </motion.a>
       </div>
     </div>
   );

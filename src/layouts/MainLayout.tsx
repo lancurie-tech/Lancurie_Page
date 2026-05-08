@@ -1,4 +1,5 @@
 import { Outlet, useLocation } from 'react-router-dom';
+import { CookieConsentModal } from '@/components/analytics/CookieConsentModal';
 import { SiteVisitTracker } from '@/components/analytics/SiteVisitTracker';
 import { ChatLauncher } from '@/components/chat/ChatLauncher';
 import { MarketingSubHeader } from '@/components/MarketingSubHeader';
@@ -30,6 +31,7 @@ export function MainLayout() {
       <Outlet />
       <SiteFooter />
       <ChatLauncher />
+      <CookieConsentModal />
     </div>
   );
 }
