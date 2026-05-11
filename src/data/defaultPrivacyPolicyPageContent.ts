@@ -27,7 +27,7 @@ export const DEFAULT_PRIVACY_POLICY_PAGE_CONTENT: PrivacyPolicyPageContent = {
 - Identificador técnico aleatório gerado no seu navegador (não é o seu nome nem e-mail), para distinguir visitantes sem obrigar login;
 - Endereço da página visitada (caminho da URL interna ao site);
 - Data do acesso (dia no fuso de referência do sistema), para contagem diária;
-- Localização aproximada: obtida em geral por estimativa a partir do IP (serviços terceiros de geo por IP) ou, quando o navegador permitir e você tiver concedido permissão de geolocalização, coordenadas aproximadas. Podem vir associados país, região ou cidade quando esses serviços devolvem esses campos.
+- Localização aproximada a partir do endereço IP (serviços terceiros de geo por IP), sem pedir permissão de geolocalização no dispositivo. Podem vir associados país, região ou cidade quando esses serviços devolvem esses campos.
 
 Se você escolher Recusar, esse registo de métricas não é feito para fins estatísticos descritos acima.`,
     },

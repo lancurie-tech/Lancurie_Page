@@ -7,8 +7,12 @@ import {
   type AnalyticsConsentStatus,
 } from '@/lib/analyticsConsent';
 
+/** Tempo até mostrar o aviso, para não sobrepor à sequência inicial (logo/boas-vindas). */
+const CONSENT_MODAL_DELAY_MS = 10_000;
+
 export function CookieConsentModal() {
   const [status, setStatus] = useState<AnalyticsConsentStatus | null>(() => readAnalyticsConsent());
+  const [delayElapsed, setDelayElapsed] = useState(false);
 
   useEffect(() => {
     const onConsentChange = () => setStatus(readAnalyticsConsent());
@@ -20,23 +24,27 @@ export function CookieConsentModal() {
     };
   }, []);
 
-  if (status) return null;
+  useEffect(() => {
+    if (status !== null) return;
+
+    setDelayElapsed(false);
+    const id = window.setTimeout(() => setDelayElapsed(true), CONSENT_MODAL_DELAY_MS);
+    return () => window.clearTimeout(id);
+  }, [status]);
+
+  if (status !== null || !delayElapsed) return null;
 
   return (
     <div
       className="fixed inset-0 z-70 flex items-center justify-center bg-black/65 px-4"
       role="dialog"
       aria-modal="true"
-      aria-label="Consentimento de cookies e métricas"
+      aria-label="Preferência de cookies"
     >
-      <div className="w-full max-w-md rounded-2xl border border-zinc-700/70 bg-zinc-950/95 p-4 shadow-[0_28px_60px_-24px_rgba(0,0,0,0.9)] sm:p-5">
-        <p className="text-sm font-semibold text-zinc-100">Privacidade e cookies</p>
-        <p className="mt-2 text-xs leading-relaxed text-zinc-300 sm:text-sm">
-          Usamos armazenamento necessário ao funcionamento do site e, com a sua permissão, métricas básicas de uso para
-          melhoria interna. Pode aceitar ou recusar.
-        </p>
-        <p className="mt-3 text-[11px] leading-relaxed text-zinc-400 sm:text-xs">
-          Ao continuar, confirma que leu a nossa{' '}
+      <div className="w-full max-w-sm rounded-xl border border-zinc-700/70 bg-zinc-950/95 p-3.5 shadow-[0_28px_60px_-24px_rgba(0,0,0,0.9)] sm:p-4">
+        <p className="text-xs font-semibold text-zinc-100 sm:text-[13px]">Cookies</p>
+        <p className="mt-1.5 text-[11px] leading-snug text-zinc-400 sm:text-xs">
+          Para melhor experiência, segurança e desempenho em nossa plataforma. — detalhes na{' '}
           <Link
             to="/privacidade"
             target="_blank"
@@ -44,10 +52,10 @@ export function CookieConsentModal() {
             className="font-medium text-cyan-300 underline decoration-cyan-500/50 underline-offset-2 hover:text-cyan-200"
           >
             política de privacidade
-          </Link>{' '}
-          e pode alterar a sua escolha depois, inclusive pelo rodapé (Gerenciar cookies).
+          </Link>
+          .
         </p>
-        <div className="mt-4 flex items-center justify-end gap-2.5">
+        <div className="mt-3.5 flex items-center justify-end gap-2">
           <button
             type="button"
             onClick={() => writeAnalyticsConsent('rejected')}

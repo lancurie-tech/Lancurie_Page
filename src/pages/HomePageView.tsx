@@ -374,11 +374,11 @@ export function HomePageView({
             >
               <motion.h1
                 variants={fadeUp}
-                className="max-w-[min(100%,46rem)] text-balance font-display text-[clamp(2.05rem,6.2vw,3.85rem)] font-normal leading-[1.04] tracking-[-0.035em] md:max-w-208 md:text-[clamp(2.35rem,6.5vw,4.15rem)] lg:col-span-10 xl:col-span-9"
+                className="max-w-[min(100%,46rem)] text-balance font-display text-[clamp(2.05rem,6.2vw,3.85rem)] font-normal leading-[1.14] tracking-[-0.035em] md:max-w-208 md:text-[clamp(2.35rem,6.5vw,4.15rem)] lg:col-span-10 xl:col-span-9"
               >
                 <span
                   className={cn(
-                    'block bg-linear-to-br bg-clip-text text-transparent drop-shadow-sm',
+                    'block pb-[0.08em] bg-linear-to-br bg-clip-text text-transparent drop-shadow-sm',
                     isWarm ? 'from-white via-orange-100 to-amber-200/90' : 'from-white via-cyan-100 to-indigo-200/90'
                   )}
                 >
@@ -743,7 +743,7 @@ export function HomePageView({
                     </div>
                   </div>
                   <h3 className="font-display text-lg font-medium tracking-tight text-zinc-100">{card.title}</h3>
-                  <p className="mt-3 flex-1 text-pretty text-sm leading-relaxed text-zinc-300/90">{card.body}</p>
+                  <p className="mt-3 flex-1 text-justify text-pretty text-sm leading-relaxed text-zinc-300/90">{card.body}</p>
                 </motion.article>
               );
             })}
