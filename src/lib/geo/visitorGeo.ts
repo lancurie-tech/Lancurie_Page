@@ -91,36 +91,6 @@ function writeCache(dayKey: string, geo: VisitorGeo): void {
   }
 }
 
-function getGeoFromBrowser(): Promise<VisitorGeo | null> {
-  if (typeof window === 'undefined' || !('geolocation' in navigator)) return Promise.resolve(null);
-  return new Promise((resolve) => {
-    navigator.geolocation.getCurrentPosition(
-      (pos) => {
-        const latitude = pos.coords.latitude;
-        const longitude = pos.coords.longitude;
-        if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) {
-          resolve(null);
-          return;
-        }
-        resolve({
-          city: null,
-          region: null,
-          country: null,
-          countryCode: null,
-          latitude,
-          longitude,
-        });
-      },
-      () => resolve(null),
-      {
-        enableHighAccuracy: false,
-        timeout: 5000,
-        maximumAge: 1000 * 60 * 60,
-      }
-    );
-  });
-}
-
 export async function getVisitorGeo(dayKey: string): Promise<VisitorGeo | null> {
   if (typeof window === 'undefined') return null;
   const cached = readCache(dayKey);
@@ -148,12 +118,6 @@ export async function getVisitorGeo(dayKey: string): Promise<VisitorGeo | null> 
     } finally {
       window.clearTimeout(timer);
     }
-  }
-
-  const fromBrowser = await getGeoFromBrowser();
-  if (fromBrowser) {
-    writeCache(dayKey, fromBrowser);
-    return fromBrowser;
   }
 
   writeFailureCache(dayKey);
