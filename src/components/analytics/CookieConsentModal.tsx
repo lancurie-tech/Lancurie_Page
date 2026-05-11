@@ -15,7 +15,13 @@ export function CookieConsentModal() {
   const [delayElapsed, setDelayElapsed] = useState(false);
 
   useEffect(() => {
-    const onConsentChange = () => setStatus(readAnalyticsConsent());
+    const onConsentChange = () => {
+      const next = readAnalyticsConsent();
+      setStatus(next);
+      if (next === null) {
+        setDelayElapsed(false);
+      }
+    };
     window.addEventListener(ANALYTICS_CONSENT_EVENT, onConsentChange as EventListener);
     window.addEventListener('storage', onConsentChange);
     return () => {
@@ -27,7 +33,6 @@ export function CookieConsentModal() {
   useEffect(() => {
     if (status !== null) return;
 
-    setDelayElapsed(false);
     const id = window.setTimeout(() => setDelayElapsed(true), CONSENT_MODAL_DELAY_MS);
     return () => window.clearTimeout(id);
   }, [status]);
