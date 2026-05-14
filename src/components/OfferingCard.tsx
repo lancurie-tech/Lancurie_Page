@@ -38,9 +38,9 @@ export function OfferingCard({
   ctaLabel,
   accentTone = 'cool',
 }: OfferingCardProps) {
+  void accentTone;
   const cardRef = useRef<HTMLElement | null>(null);
   const teaserMode = variant === 'teaser';
-  const isWarm = accentTone === 'warm';
 
   const setPointerVars = useCallback((clientX: number, clientY: number) => {
     const node = cardRef.current;
@@ -60,15 +60,9 @@ export function OfferingCard({
   }, []);
 
   const ctaClassName =
-    cn(
-      'mt-4 flex w-full items-center justify-center rounded-xl border border-zinc-500/45 bg-zinc-950/60 py-2 text-[0.78rem] font-semibold tracking-[0.01em] text-zinc-100 shadow-sm shadow-black/30 transition-all duration-300 hover:-translate-y-px hover:bg-zinc-900/85',
-      isWarm ? 'hover:border-orange-500/40' : 'hover:border-cyan-500/35'
-    );
+    'mt-4 flex w-full items-center justify-center rounded-xl border border-zinc-500/45 bg-zinc-950/60 py-2 text-[0.78rem] font-semibold tracking-[0.01em] text-zinc-100 shadow-sm shadow-black/30 transition-all duration-300 hover:-translate-y-px hover:border-white/35 hover:bg-zinc-900/85';
   const teaserCtaClassName =
-    cn(
-      'mt-auto inline-flex items-center gap-1 text-[0.74rem] font-semibold tracking-[0.01em] text-zinc-100/95 transition-colors duration-300',
-      isWarm ? 'hover:text-orange-200' : 'hover:text-cyan-200'
-    );
+    'mt-auto inline-flex items-center gap-1 text-[0.74rem] font-semibold tracking-[0.01em] text-zinc-100/95 transition-colors duration-300 hover:text-zinc-50';
   const showOverlay = variant === 'full';
   const hasBody = body != null && body !== '';
   const hasBullets = bullets != null && bullets !== '';
@@ -80,9 +74,7 @@ export function OfferingCard({
       onPointerLeave={teaserMode ? resetPointerVars : undefined}
       className={cn(
         'group relative overflow-hidden rounded-2xl border border-zinc-600/35 bg-zinc-900/45 shadow-[0_20px_40px_-18px_rgba(0,0,0,0.45)] ring-1 ring-inset ring-white/4 transition-[transform,box-shadow,border-color] duration-500 ease-out sm:rounded-[1.35rem]',
-        isWarm
-          ? 'hover:-translate-y-1 hover:border-orange-500/24 hover:shadow-[0_28px_50px_-16px_rgba(0,0,0,0.55)]'
-          : 'hover:-translate-y-1 hover:border-cyan-500/20 hover:shadow-[0_28px_50px_-16px_rgba(0,0,0,0.55)]',
+        'hover:-translate-y-1 hover:border-white/22 hover:shadow-[0_28px_50px_-16px_rgba(0,0,0,0.55)]',
         className
       )}
     >
@@ -143,7 +135,7 @@ export function OfferingCard({
         )}
       >
         <div className={teaserMode ? 'mt-[9%] max-w-[86%] sm:mt-[8%]' : undefined}>
-          <h3 className={cn('tracking-tight text-zinc-50', teaserMode ? 'font-display text-[1.78rem] font-normal leading-[0.95] sm:text-[1.6rem]' : 'text-lg font-semibold')}>
+          <h3 className={cn('tracking-tight text-zinc-50', teaserMode ? 'font-display text-[1.78rem] font-semibold leading-[0.98] sm:text-[1.6rem]' : 'text-lg font-semibold')}>
             {title}
           </h3>
           {tagline ? (

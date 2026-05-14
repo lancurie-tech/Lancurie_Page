@@ -427,7 +427,7 @@ export function WorldAccessMap({ points, totalVisits }: WorldAccessMapProps) {
                   hoveredRef.current = null;
                   setHovered(null);
                 }}
-                className="pointer-events-auto absolute rounded-full border border-cyan-200/60 bg-cyan-400/80 shadow-[0_0_16px_rgba(34,211,238,0.55)]"
+                className="pointer-events-auto absolute rounded-full border border-zinc-200/55 bg-zinc-100/90 shadow-[0_0_14px_rgba(255,255,255,0.35)]"
                 style={{
                   left: 0,
                   top: 0,

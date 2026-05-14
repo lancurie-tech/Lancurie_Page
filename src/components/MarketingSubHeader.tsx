@@ -32,7 +32,7 @@ export function MarketingSubHeader() {
 
   return (
     <div
-      className="relative z-40 border-t border-zinc-700/25 bg-linear-to-b from-[#050508] via-[#080a12] to-[#0d1422] backdrop-blur-[3px] [box-shadow:inset_0_1px_0_0_rgba(255,255,255,0.05)]"
+      className="relative z-40 border-t border-zinc-800/35 bg-linear-to-b from-[#050508] via-[#060607] to-[#080809] backdrop-blur-[3px] [box-shadow:inset_0_1px_0_0_rgba(255,255,255,0.04)]"
       role="navigation"
       aria-label={p.marketing.subnavAria}
     >
@@ -51,7 +51,7 @@ export function MarketingSubHeader() {
                   className={cn(
                     'inline-flex items-center rounded-md px-2.5 py-1.5 text-center text-[0.68rem] leading-tight font-medium tracking-[0.04em] transition-colors sm:px-3 sm:py-2 sm:text-[0.74rem] sm:leading-normal sm:tracking-wide',
                     pathname === '/' && current === item.section
-                      ? 'text-zinc-100 underline decoration-cyan-300/60 decoration-2 underline-offset-[0.22em]'
+                      ? 'text-zinc-100 underline decoration-zinc-400/55 decoration-2 underline-offset-[0.22em]'
                       : 'text-zinc-400 hover:text-zinc-100'
                   )}
                 >

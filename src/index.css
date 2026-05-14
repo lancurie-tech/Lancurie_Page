@@ -5,13 +5,14 @@
 
 @theme {
   --font-sans: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
-  --font-display: 'Instrument Serif', Georgia, 'Times New Roman', serif;
-  /* Acento “tech” (referência: produtos B2B modernos) — usar com parcimónia */
-  --lancurie-accent: #38e1ff;
-  --lancurie-accent-secondary: #7c5cff;
-  --lancurie-accent-faint: color-mix(in srgb, var(--lancurie-accent) 22%, transparent);
-  --lancurie-surface-deep: #060b14;
-  --lancurie-surface-mid: #141d31;
+  --font-display: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  --font-hero: 'Space Grotesk', ui-sans-serif, system-ui, sans-serif;
+  /* Monocromático premium — clarões brancos, sem ciano/azul editorial */
+  --lancurie-accent: #f4f4f5;
+  --lancurie-accent-secondary: #a1a1aa;
+  --lancurie-accent-faint: color-mix(in srgb, var(--lancurie-accent) 18%, transparent);
+  --lancurie-surface-deep: #050506;
+  --lancurie-surface-mid: #121212;
 }
 
 @media (prefers-reduced-motion: no-preference) {
@@ -24,7 +25,7 @@ body {
   margin: 0;
   min-height: 100vh;
   font-family: 'Montserrat', ui-sans-serif, system-ui, sans-serif;
-  background: #060b14;
+  background: #050506;
   color: #f4f4f5;
   -webkit-font-smoothing: antialiased;
   text-rendering: optimizeLegibility;
@@ -37,24 +38,6 @@ html[data-theme='light'] body {
 
 #root {
   min-height: 100vh;
-}
-
-/* Home hero — textura de pontos muito suave (não é fotografia) */
-.lancurie-hero-dots {
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    rgb(28 25 23 / 0.06) 1px,
-    transparent 0
-  );
-  background-size: 22px 22px;
-}
-
-html[data-theme='dark'] .lancurie-hero-dots {
-  background-image: radial-gradient(
-    circle at 1px 1px,
-    rgb(244 244 245 / 0.06) 1px,
-    transparent 0
-  );
 }
 
 /* Recepção — só o bloco de conteúdo central (sem “caixa” no logo) */
@@ -221,8 +204,8 @@ html[data-theme='dark'] .lancurie-hero-dots {
 /* Malha sutil (inspirada em grelhas de sites tech premium — só decoração) */
 .lancurie-hero-mesh {
   background-image:
-    linear-gradient(to right, rgb(91 163 255 / 0.1) 1px, transparent 1px),
-    linear-gradient(to bottom, rgb(91 163 255 / 0.1) 1px, transparent 1px);
+    linear-gradient(to right, rgb(244 244 245 / 0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgb(244 244 245 / 0.055) 1px, transparent 1px);
   background-size: 56px 56px;
   background-position: center -1px;
   mask-image: linear-gradient(to bottom, rgb(0 0 0) 0%, rgb(0 0 0) 32%, transparent 88%);
@@ -230,25 +213,29 @@ html[data-theme='dark'] .lancurie-hero-dots {
   mix-blend-mode: soft-light;
 }
 
-.lancurie-hero-aurora {
-  background:
-    radial-gradient(
-      ellipse 78% 52% at 48% 16%,
-      color-mix(in srgb, var(--lancurie-accent) 32%, transparent) 0%,
-      transparent 54%
-    ),
-    radial-gradient(
-      ellipse 55% 42% at 72% 18%,
-      color-mix(in srgb, var(--lancurie-accent-secondary) 25%, transparent) 0%,
-      transparent 58%
-    );
-  pointer-events: none;
-}
-
 @media (prefers-reduced-motion: reduce) {
   .lancurie-hero-mesh {
     opacity: 0.5;
   }
+}
+
+/* Faixas da home — preto neutro + focos de luz branca (sem azul editorial) */
+.lancurie-band-a {
+  background:
+    radial-gradient(ellipse 92% 56% at 14% -10%, rgb(255 255 255 / 0.055), transparent 52%),
+    linear-gradient(180deg, #080809 0%, #050506 45%, #09090b 100%);
+}
+
+.lancurie-band-b {
+  background:
+    radial-gradient(ellipse 78% 50% at 88% 0%, rgb(255 255 255 / 0.038), transparent 48%),
+    linear-gradient(180deg, #09090b 0%, #050506 50%, #070708 100%);
+}
+
+.lancurie-band-c {
+  background:
+    radial-gradient(ellipse 68% 46% at 22% -6%, rgb(255 255 255 / 0.042), transparent 50%),
+    linear-gradient(180deg, #070708 0%, #030303 55%, #060606 100%);
 }
 
 /* Autofill em superfícies escuras — manter contraste sem o azul claro do Chrome */

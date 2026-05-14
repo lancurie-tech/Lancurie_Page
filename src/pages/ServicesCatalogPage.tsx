@@ -47,9 +47,9 @@ export function ServicesCatalogPage() {
 
   return (
     <main className="flex-1">
-      <section className="bg-[linear-gradient(180deg,#131c2f_0%,#0f1629_18%,#111a2d_54%,#121c30_100%)] py-12 sm:py-16">
+      <section className="lancurie-band-b py-12 sm:py-16">
         <div className="mx-auto max-w-6xl px-4 sm:px-8 lg:px-12">
-          <h1 className="font-display text-3xl font-normal tracking-tight text-zinc-100 sm:text-4xl">
+          <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
             {p.services.title}
           </h1>
           <p className="mt-5 max-w-3xl text-sm leading-relaxed text-zinc-300/90 sm:text-base">{p.services.lead}</p>

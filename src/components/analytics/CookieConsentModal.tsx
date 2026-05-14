@@ -54,7 +54,7 @@ export function CookieConsentModal() {
             to="/privacidade"
             target="_blank"
             rel="noopener noreferrer"
-            className="font-medium text-cyan-300 underline decoration-cyan-500/50 underline-offset-2 hover:text-cyan-200"
+            className="font-medium text-zinc-300 underline decoration-zinc-500/50 underline-offset-2 hover:text-zinc-100"
           >
             política de privacidade
           </Link>

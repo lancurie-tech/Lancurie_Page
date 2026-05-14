@@ -86,14 +86,14 @@ export function SiteFooter() {
             >
               <Link
                 to="/privacidade"
-                className="text-cyan-300 underline decoration-cyan-500/50 underline-offset-2 transition-colors hover:text-cyan-200"
+                className="text-zinc-300 underline decoration-zinc-500/50 underline-offset-2 transition-colors hover:text-zinc-100"
               >
                 Política de privacidade
               </Link>
               <button
                 type="button"
                 onClick={clearAnalyticsConsent}
-                className="text-cyan-300 underline decoration-cyan-500/50 underline-offset-2 transition-colors hover:text-cyan-200"
+                className="text-zinc-300 underline decoration-zinc-500/50 underline-offset-2 transition-colors hover:text-zinc-100"
               >
                 Gerenciar cookies
               </button>
