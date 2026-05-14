@@ -343,7 +343,7 @@ export function HomePageView({
                         className={cn(
                           'flex items-start gap-2 rounded-lg border px-3 py-2 text-left transition-all duration-300',
                           active
-                            ? 'border-white/28 bg-white/[0.09] text-zinc-50'
+                            ? 'border-white/28 bg-white/9 text-zinc-50'
                             : 'border-zinc-700/60 bg-zinc-900/25 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
                         )}
                         aria-label={`Mostrar etapa ${i + 1}`}
@@ -372,7 +372,7 @@ export function HomePageView({
             >
               <motion.div variants={fadeUp} className="relative">
                 <div
-                  className="group relative min-h-44 overflow-hidden rounded-2xl bg-linear-to-b from-zinc-900/95 via-zinc-950 to-[#060607] p-4 shadow-[0_28px_68px_-28px_rgba(0,0,0,0.92)] ring-1 ring-inset ring-white/[0.06] sm:min-h-52 sm:p-5"
+                  className="group relative min-h-44 overflow-hidden rounded-2xl bg-linear-to-b from-zinc-900/95 via-zinc-950 to-[#060607] p-4 shadow-[0_28px_68px_-28px_rgba(0,0,0,0.92)] ring-1 ring-inset ring-white/6 sm:min-h-52 sm:p-5"
                   style={{ perspective: 1200 }}
                   onMouseEnter={() => {
                     clearApproachHoverResumeTimeout();
@@ -428,11 +428,11 @@ export function HomePageView({
                     aria-hidden
                   />
                   <div
-                    className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-white/[0.08] blur-3xl"
+                    className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-white/8 blur-3xl"
                     aria-hidden
                   />
                   <div
-                    className="pointer-events-none absolute -left-12 bottom-0 h-44 w-44 rounded-full bg-white/[0.045] blur-3xl"
+                    className="pointer-events-none absolute -left-12 bottom-0 h-44 w-44 rounded-full bg-white/4.5 blur-3xl"
                     aria-hidden
                   />
 

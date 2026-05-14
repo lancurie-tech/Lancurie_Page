@@ -226,10 +226,16 @@ html[data-theme='light'] body {
     linear-gradient(180deg, #080809 0%, #050506 45%, #09090b 100%);
 }
 
+/* Faixa “serviços / portfólio”: focos de luz marcados vs band-a/c (mesmo em /servicos) */
 .lancurie-band-b {
   background:
-    radial-gradient(ellipse 78% 50% at 88% 0%, rgb(255 255 255 / 0.038), transparent 48%),
-    linear-gradient(180deg, #09090b 0%, #050506 50%, #070708 100%);
+    radial-gradient(ellipse 86% 58% at 50% -4%, rgb(255 255 255 / 0.14), transparent 60%),
+    radial-gradient(ellipse 120% 85% at 50% 48%, rgb(255 255 255 / 0.078), transparent 68%),
+    radial-gradient(ellipse 76% 52% at 4% 28%, rgb(255 255 255 / 0.1), transparent 56%),
+    radial-gradient(ellipse 92% 60% at 98% 24%, rgb(255 255 255 / 0.105), transparent 54%),
+    radial-gradient(ellipse 74% 50% at 78% 96%, rgb(255 255 255 / 0.075), transparent 58%),
+    radial-gradient(ellipse 68% 44% at 18% 88%, rgb(255 255 255 / 0.062), transparent 56%),
+    linear-gradient(180deg, #111116 0%, #09090f 44%, #0f0f14 100%);
 }
 
 .lancurie-band-c {
