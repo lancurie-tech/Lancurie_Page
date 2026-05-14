@@ -36,7 +36,7 @@ function renderWithEmailLink(text: string, email: string): ReactNode {
       <a
         key={i}
         href={`mailto:${email}`}
-        className="font-medium text-cyan-300 underline decoration-cyan-500/45 underline-offset-2 hover:text-cyan-200"
+        className="font-medium text-zinc-300 underline decoration-zinc-500/45 underline-offset-2 hover:text-zinc-100"
       >
         {email}
       </a>
@@ -80,10 +80,10 @@ export function PrivacyPolicyPage() {
 
   return (
     <main className="flex-1">
-      <article className="border-b border-zinc-800/80 bg-[linear-gradient(180deg,#131c2f_0%,#0f1629_22%,#0d1424_100%)] py-12 sm:py-16">
+      <article className="lancurie-band-b border-b border-zinc-800/80 py-12 sm:py-16">
         <div className="mx-auto max-w-3xl px-4 sm:px-8 lg:px-12">
-          <p className="text-[0.64rem] font-semibold uppercase tracking-[0.24em] text-cyan-100/55">{pp.eyebrow}</p>
-          <h1 className="mt-3 font-display text-3xl font-normal tracking-tight text-zinc-50 sm:text-4xl">{pp.title}</h1>
+          <p className="text-[0.64rem] font-semibold uppercase tracking-[0.24em] text-zinc-500">{pp.eyebrow}</p>
+          <h1 className="mt-3 font-display text-3xl font-semibold tracking-tight text-zinc-50 sm:text-4xl">{pp.title}</h1>
           <p className="mt-2 text-xs text-zinc-500">{pp.lastUpdatedLine}</p>
 
           <div className="mt-10 space-y-8">
@@ -96,7 +96,7 @@ export function PrivacyPolicyPage() {
           </div>
 
           <p className="mt-12 border-t border-zinc-800/90 pt-8 text-center text-xs text-zinc-500">
-            <Link to="/" className={cn('font-medium text-cyan-400/90 underline-offset-2 hover:underline')}>
+            <Link to="/" className={cn('font-medium text-zinc-300 underline-offset-2 hover:text-zinc-100 hover:underline')}>
               {pp.backLinkLabel}
             </Link>
           </p>

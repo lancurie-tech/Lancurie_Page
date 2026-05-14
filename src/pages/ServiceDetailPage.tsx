@@ -36,7 +36,7 @@ export function ServiceDetailPage() {
       ? bulletBlock.items.length > 0
       : bulletBlock.text.length > 0);
   return (
-    <main className="flex-1 bg-[linear-gradient(180deg,#121c30_0%,#0f1728_26%,#0d1424_64%,#0d1321_100%)]">
+    <main className="flex-1 lancurie-band-c">
       <article className="mx-auto max-w-6xl px-4 py-12 sm:px-8 sm:py-16 lg:px-12">
         <div
           className={cn(
@@ -46,7 +46,7 @@ export function ServiceDetailPage() {
         >
           <div className="min-w-0">
             <header className="max-w-3xl">
-              <h1 className="font-display text-3xl font-normal tracking-tight text-zinc-100 sm:text-4xl">
+              <h1 className="font-display text-3xl font-semibold tracking-tight text-zinc-100 sm:text-4xl">
                 {title}
               </h1>
               {tagline ? (

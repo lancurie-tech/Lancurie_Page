@@ -250,11 +250,7 @@ export function ServicesStack({
                 }}
                 className={cn(
                   'h-1.5 rounded-full transition-all',
-                  i === active
-                    ? accentTone === 'warm'
-                      ? 'w-7 bg-orange-300/90'
-                      : 'w-7 bg-cyan-300/85'
-                    : 'w-3 bg-zinc-600/75'
+                  i === active ? 'w-7 bg-zinc-200/88' : 'w-3 bg-zinc-600/75'
                 )}
                 aria-label={`Mostrar serviço ${i + 1}`}
               />
@@ -268,20 +264,12 @@ export function ServicesStack({
           to="/servicos"
           className={cn(
             'group relative inline-flex items-center overflow-hidden rounded-xl border px-5 py-2.5 text-sm font-semibold text-zinc-100 transition-all duration-300',
-            'bg-linear-to-b from-[#101a31]/88 via-[#0d1529]/84 to-[#0a1223]/90 shadow-[0_14px_34px_-18px_rgba(0,0,0,0.7)] ring-1 ring-inset ring-white/8',
-            'hover:-translate-y-0.5 hover:shadow-[0_22px_42px_-20px_rgba(0,0,0,0.78)]',
-            accentTone === 'warm'
-              ? 'border-orange-300/26 hover:border-orange-300/45'
-              : 'border-cyan-300/22 hover:border-cyan-300/42'
+            'border-white/22 bg-linear-to-b from-zinc-900/88 via-zinc-950/84 to-[#060607]/92 shadow-[0_14px_34px_-18px_rgba(0,0,0,0.78)] ring-1 ring-inset ring-white/[0.07]',
+            'hover:-translate-y-0.5 hover:border-white/38 hover:shadow-[0_22px_42px_-20px_rgba(0,0,0,0.85)]'
           )}
         >
           <span
-            className={cn(
-              'pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100',
-              accentTone === 'warm'
-                ? 'bg-[radial-gradient(130%_95%_at_50%_0%,rgba(255,138,89,0.24),transparent_60%)]'
-                : 'bg-[radial-gradient(130%_95%_at_50%_0%,rgba(56,189,248,0.22),transparent_60%)]'
-            )}
+            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(130%_95%_at_50%_0%,rgba(255,255,255,0.14),transparent_62%)]"
             aria-hidden
           />
           <span className="relative">Conheça todos nossos serviços</span>

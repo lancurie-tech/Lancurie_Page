@@ -3,7 +3,6 @@ import { AnimatePresence, motion, type PanInfo, useReducedMotion } from 'framer-
 import { Activity, ChevronDown, Scissors, Store } from 'lucide-react';
 import { ServicesStack } from '@/components/home/ServicesStack';
 import { fadeUpVariants, staggerContainerVariants, viewportOnce } from '@/components/home/homeMotion';
-import { NeuralNoise } from '@/components/ui/neural-noise';
 import type { SiteImageKey } from '@/data/siteImageConfig';
 import { useI18n } from '@/i18n/useI18n';
 import { cn } from '@/lib/cn';
@@ -36,21 +35,8 @@ export function HomePageView({
     className?: string;
   }) => (
     <div className={cn('mx-auto max-w-3xl text-center', className)}>
-      <p
-        className={cn(
-          'text-[0.64rem] font-semibold uppercase tracking-[0.24em]',
-          isWarm ? 'text-orange-100/65' : 'text-cyan-100/60'
-        )}
-      >
-        {eyebrow}
-      </p>
-      <h2
-        className={cn(
-          'mt-3 text-balance font-display text-[1.95rem] font-normal leading-[1.05] tracking-[-0.01em] text-transparent sm:text-[2.4rem] md:text-[2.8rem]',
-          'bg-linear-to-br bg-clip-text drop-shadow-[0_2px_14px_rgba(120,165,255,0.26)]',
-          isWarm ? 'from-zinc-50 via-orange-100 to-amber-200/95' : 'from-zinc-50 via-cyan-100 to-indigo-200/95'
-        )}
-      >
+      <p className="text-[0.64rem] font-semibold uppercase tracking-[0.26em] text-zinc-500">{eyebrow}</p>
+      <h2 className="mt-3 text-balance font-display text-[1.95rem] font-semibold leading-[1.08] tracking-[-0.03em] text-zinc-50 sm:text-[2.4rem] md:text-[2.85rem]">
         {title}
       </h2>
       <div
@@ -85,7 +71,6 @@ export function HomePageView({
   const [approachHoverPaused, setApproachHoverPaused] = useState(false);
   const [approachTouchPaused, setApproachTouchPaused] = useState(false);
   const [approachDirection, setApproachDirection] = useState<1 | -1>(1);
-  const [isMobileViewport, setIsMobileViewport] = useState(false);
   const [proofMobileActiveIdx, setProofMobileActiveIdx] = useState(0);
   const approachPauseTimeoutRef = useRef<number | null>(null);
   const approachHoverResumeTimeoutRef = useRef<number | null>(null);
@@ -148,15 +133,6 @@ export function HomePageView({
       approachTouchResumeTimeoutRef.current = null;
     }
   };
-  useEffect(() => {
-    if (typeof window === 'undefined') return;
-    const media = window.matchMedia('(max-width: 767px)');
-    const onChange = () => setIsMobileViewport(media.matches);
-    onChange();
-    media.addEventListener('change', onChange);
-    return () => media.removeEventListener('change', onChange);
-  }, []);
-
   useEffect(() => {
     if (reduceMotion || approachPaused || approachHoverPaused || approachTouchPaused || approachItems.length <= 1) return;
     const t = window.setInterval(() => {
@@ -244,9 +220,6 @@ export function HomePageView({
     document.documentElement.setAttribute('data-lancurie-palette', paletteTone);
   }, [paletteTone]);
 
-  const isWarm = paletteTone === 'warm';
-  const useLightHeroEffects = reduceMotion || isMobileViewport;
-
   const scrollHint = (
     <a
       href="#approach"
@@ -261,142 +234,65 @@ export function HomePageView({
     <main className="relative flex-1">
       <section
         id="hero"
-        className="relative flex min-h-[calc(100dvh-10rem-env(safe-area-inset-bottom,0px))] flex-col overflow-hidden rounded-b-3xl sm:min-h-[calc(100dvh-9rem-env(safe-area-inset-bottom,0px))] sm:rounded-b-4xl"
+        className="relative flex min-h-[calc(100dvh-10rem-env(safe-area-inset-bottom,0px))] flex-col overflow-hidden rounded-b-3xl bg-[#050505] sm:min-h-[calc(100dvh-9rem-env(safe-area-inset-bottom,0px))] sm:rounded-b-4xl"
       >
+        <div className="pointer-events-none absolute inset-0 z-0 overflow-hidden rounded-b-3xl sm:rounded-b-4xl" aria-hidden>
+          <img
+            src="/brand/fundo_hero.png"
+            alt=""
+            width={1920}
+            height={1080}
+            className="h-full min-h-full w-full scale-[1.02] object-cover object-[72%_50%] md:object-[76%_48%]"
+            loading="eager"
+            decoding="async"
+            fetchPriority="high"
+          />
+        </div>
         <div
-          className="pointer-events-none absolute inset-0 bg-[linear-gradient(180deg,#0d1422_0%,#060b14_18%,#0e1630_32%,#17233d_100%)]"
-          aria-hidden
-        />
-        {!useLightHeroEffects ? (
-          <div
-            className="pointer-events-none absolute inset-0 z-0 min-h-full w-full overflow-hidden"
-            aria-hidden
-          >
-            <NeuralNoise
-              className="min-h-full mix-blend-screen"
-              color={isWarm ? [0.96, 0.38, 0.24] : [0.17, 0.62, 0.92]}
-              opacity={0.64}
-              speed={0.0032}
-            />
-          </div>
-        ) : null}
-        <div
-          className="pointer-events-none absolute inset-0 z-1 bg-linear-to-b from-[#04070f]/58 via-[#060b16]/18 to-[#060b14]/70"
+          className="pointer-events-none absolute inset-0 z-1 bg-[linear-gradient(90deg,rgba(5,5,5,0.55)_0%,rgba(5,5,5,0.2)_42%,transparent_74%)]"
           aria-hidden
         />
         <div
-          className={cn(
-            'lancurie-hero-aurora pointer-events-none absolute inset-0 z-2',
-            useLightHeroEffects && 'opacity-75'
-          )}
+          className="pointer-events-none absolute inset-0 z-1 bg-[linear-gradient(180deg,rgba(5,5,5,0.15)_0%,transparent_42%,transparent_58%,rgba(5,5,5,0.45)_100%)]"
           aria-hidden
         />
         <div
-          className={cn(
-            'lancurie-hero-mesh pointer-events-none absolute inset-0 z-2 opacity-[0.38]',
-            useLightHeroEffects && 'opacity-[0.22]'
-          )}
+          className="pointer-events-none absolute inset-0 z-2 rounded-b-3xl sm:rounded-b-4xl shadow-[inset_0_0_min(140px,20vw)_rgba(0,0,0,0.5)] sm:shadow-[inset_0_0_min(200px,24vw)_rgba(0,0,0,0.42)]"
           aria-hidden
         />
-        <motion.div
-          className="pointer-events-none absolute -left-24 top-0 z-2 h-[min(42rem,85vw)] w-[min(42rem,85vw)] rounded-full bg-zinc-300/10 blur-[100px]"
-          aria-hidden
-          animate={
-            useLightHeroEffects
-              ? undefined
-              : { y: [0, -28, 0], x: [0, 12, 0], scale: [1, 1.06, 1], opacity: [0.75, 0.95, 0.75] }
-          }
-          transition={{ duration: 16, repeat: Infinity, ease: 'easeInOut' }}
-        />
-        <motion.div
-          className="pointer-events-none absolute -right-20 bottom-0 z-2 h-[min(36rem,75vw)] w-[min(36rem,75vw)] rounded-full bg-slate-500/10 blur-[90px]"
-          aria-hidden
-          animate={
-            useLightHeroEffects
-              ? undefined
-              : { y: [0, 22, 0], x: [0, -16, 0], scale: [1, 1.05, 1], opacity: [0.65, 0.88, 0.65] }
-          }
-          transition={{ duration: 18, repeat: Infinity, ease: 'easeInOut', delay: 0.8 }}
-        />
-        <motion.div
-          className={cn(
-            'pointer-events-none absolute left-1/2 top-1/4 z-2 h-[min(28rem,60vw)] w-[min(28rem,60vw)] -translate-x-1/2 rounded-full blur-[88px]',
-            isWarm ? 'bg-orange-400/20' : 'bg-cyan-300/15'
-          )}
-          aria-hidden
-          animate={
-            useLightHeroEffects
-              ? undefined
-              : { y: [0, 18, 0], scale: [1, 1.08, 1], opacity: [0.45, 0.7, 0.45] }
-          }
-          transition={{ duration: 14, repeat: Infinity, ease: 'easeInOut', delay: 0.4 }}
-        />
-        <div
-          className="pointer-events-none absolute left-[18%] top-[55%] z-2 h-[min(22rem,50vw)] w-[min(22rem,50vw)] rounded-full bg-zinc-600/12 blur-[72px]"
-          aria-hidden
-        />
-        <div
-          className={cn(
-            'pointer-events-none absolute inset-0 z-2',
-            isWarm
-              ? 'bg-[radial-gradient(ellipse_95%_58%_at_50%_0%,rgba(255,124,69,0.2),transparent_56%)]'
-              : 'bg-[radial-gradient(ellipse_95%_58%_at_50%_0%,rgba(92,175,255,0.16),transparent_56%)]'
-          )}
-          aria-hidden
-        />
-        <div
-          className={cn(
-            'lancurie-hero-dots pointer-events-none absolute inset-0 z-2 opacity-50',
-            useLightHeroEffects && 'opacity-30'
-          )}
-          aria-hidden
-        />
-        <div className="lancurie-grain pointer-events-none absolute inset-0 z-2" aria-hidden />
-        {!useLightHeroEffects ? (
-          <div className="pointer-events-none absolute inset-0 z-2 overflow-hidden" aria-hidden>
+        <div className="relative z-10 flex min-h-0 flex-1 flex-col justify-center px-4 pb-8 pt-12 max-[380px]:pt-10 max-sm:-translate-y-22 sm:translate-y-0 sm:px-6 sm:pb-14 sm:pt-20 md:px-10 md:pb-18 md:pt-24 lg:px-12 lg:pb-20 lg:pt-28">
+          <div className="relative mx-auto w-full max-w-6xl">
             <motion.div
-              className="absolute -left-1/3 top-0 h-full w-[55%] bg-linear-to-r from-transparent via-white/5.5 to-transparent opacity-0"
-              style={{ skewX: -18 }}
-              initial={{ x: '-20%', opacity: 0 }}
-              animate={{ x: ['-20%', '120%'], opacity: [0, 0.9, 0] }}
-              transition={{ duration: 2.4, delay: 0.35, ease: [0.22, 1, 0.36, 1] }}
-            />
-          </div>
-        ) : null}
-
-        <div className="relative z-10 flex min-h-0 flex-1 flex-col justify-center px-4 pb-8 pt-12 max-[380px]:pt-10 sm:px-6 sm:pb-14 sm:pt-20 md:px-10 md:pb-18 md:pt-24 lg:px-12 lg:pb-20 lg:pt-28">
-          <div className="mx-auto w-full max-w-6xl">
-            <motion.div
-              className="grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start lg:gap-8 xl:gap-10"
+              className="relative z-1 grid grid-cols-1 gap-6 lg:grid-cols-12 lg:items-start lg:gap-8 xl:gap-10"
               variants={staggerHero}
               initial="hidden"
               animate="visible"
             >
-              <motion.h1
-                variants={fadeUp}
-                className="max-w-[min(100%,46rem)] text-balance font-display text-[clamp(2.05rem,6.2vw,3.85rem)] font-normal leading-[1.14] tracking-[-0.035em] md:max-w-208 md:text-[clamp(2.35rem,6.5vw,4.15rem)] lg:col-span-10 xl:col-span-9"
-              >
-                <span
-                  className={cn(
-                    'block pb-[0.08em] bg-linear-to-br bg-clip-text text-transparent drop-shadow-sm',
-                    isWarm ? 'from-white via-orange-100 to-amber-200/90' : 'from-white via-cyan-100 to-indigo-200/90'
-                  )}
+              {p.hero.kicker.trim() ? (
+                <motion.p
+                  variants={fadeUp}
+                  className="mb-5 text-[0.62rem] font-semibold uppercase tracking-[0.28em] text-zinc-500 sm:mb-6 lg:col-span-10 xl:col-span-9"
                 >
-                  {p.hero.line1}
-                </span>
-                <span className="mt-4 block max-w-160 text-pretty font-display text-[clamp(1.08rem,2.4vw,1.7rem)] font-normal leading-relaxed tracking-[-0.018em] text-zinc-200/92 sm:mt-5 sm:leading-snug sm:text-[clamp(1.2rem,2.25vw,1.8rem)]">
-                  {p.hero.line2}
-                </span>
-              </motion.h1>
+                  {p.hero.kicker}
+                </motion.p>
+              ) : null}
+              <motion.div variants={fadeUp} className="lg:col-span-10 xl:col-span-9">
+                <h1 className="max-w-[min(100%,46rem)] font-hero text-[clamp(2.05rem,5.8vw,3.65rem)] font-semibold leading-[1.12] tracking-[-0.04em] text-zinc-50 md:max-w-[min(100%,52rem)] md:text-[clamp(2.2rem,5.2vw,3.95rem)]">
+                  <span className="block text-balance">{p.hero.line1}</span>
+                  <span className="mt-4 block max-w-160 text-pretty text-[clamp(1.05rem,2.35vw,1.65rem)] font-normal leading-relaxed tracking-[-0.02em] text-zinc-400 sm:mt-5 sm:leading-snug">
+                    {p.hero.line2}
+                  </span>
+                </h1>
+              </motion.div>
             </motion.div>
           </div>
         </div>
 
         <motion.div
           className="relative z-10 flex shrink-0 justify-center pb-6 sm:pb-8"
-          initial={{ opacity: 0, y: useLightHeroEffects ? 0 : 12 }}
+          initial={{ opacity: 0, y: reduceMotion ? 0 : 12 }}
           animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: useLightHeroEffects ? 0 : 0.85, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
+          transition={{ delay: reduceMotion ? 0 : 0.85, duration: 0.55, ease: [0.22, 1, 0.36, 1] }}
         >
           {scrollHint}
         </motion.div>
@@ -406,15 +302,15 @@ export function HomePageView({
       <div className="relative">
         <div
           className={cn(
-            'pointer-events-none absolute inset-0 z-0 hidden bg-[linear-gradient(90deg,rgba(2,6,12,0.38)_0%,transparent_17%),linear-gradient(270deg,rgba(2,6,12,0.38)_0%,transparent_17%)] lg:block',
-            'xl:bg-[linear-gradient(90deg,rgba(2,6,12,0.5)_0%,transparent_23%),linear-gradient(270deg,rgba(2,6,12,0.5)_0%,transparent_23%)]',
-            '2xl:bg-[linear-gradient(90deg,rgba(2,6,12,0.6)_0%,transparent_28%),linear-gradient(270deg,rgba(2,6,12,0.6)_0%,transparent_28%)]'
+            'pointer-events-none absolute inset-0 z-0 hidden bg-[linear-gradient(90deg,rgba(0,0,0,0.42)_0%,transparent_17%),linear-gradient(270deg,rgba(0,0,0,0.42)_0%,transparent_17%)] lg:block',
+            'xl:bg-[linear-gradient(90deg,rgba(0,0,0,0.52)_0%,transparent_23%),linear-gradient(270deg,rgba(0,0,0,0.52)_0%,transparent_23%)]',
+            '2xl:bg-[linear-gradient(90deg,rgba(0,0,0,0.62)_0%,transparent_28%),linear-gradient(270deg,rgba(0,0,0,0.62)_0%,transparent_28%)]'
           )}
           aria-hidden
         />
       <section
         id="approach"
-        className="relative z-1 scroll-mt-24 bg-[linear-gradient(180deg,#17233d_0%,#101728_16%,#131d32_56%,#131c2f_100%)] py-12 sm:py-16 lg:py-20"
+        className="lancurie-band-a relative z-1 scroll-mt-24 py-12 sm:py-16 lg:py-20"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-8 lg:px-12">
           <SectionHeading
@@ -447,9 +343,7 @@ export function HomePageView({
                         className={cn(
                           'flex items-start gap-2 rounded-lg border px-3 py-2 text-left transition-all duration-300',
                           active
-                            ? isWarm
-                              ? 'border-orange-300/60 bg-orange-500/16 text-zinc-100'
-                              : 'border-cyan-300/55 bg-cyan-400/16 text-zinc-100'
+                            ? 'border-white/28 bg-white/[0.09] text-zinc-50'
                             : 'border-zinc-700/60 bg-zinc-900/25 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
                         )}
                         aria-label={`Mostrar etapa ${i + 1}`}
@@ -457,7 +351,7 @@ export function HomePageView({
                         <span
                           className={cn(
                             'font-display text-sm tabular-nums',
-                            active ? (isWarm ? 'text-orange-100' : 'text-cyan-100') : 'text-zinc-500'
+                            active ? 'text-zinc-200' : 'text-zinc-500'
                           )}
                         >
                           {String(i + 1).padStart(2, '0')}
@@ -478,7 +372,7 @@ export function HomePageView({
             >
               <motion.div variants={fadeUp} className="relative">
                 <div
-                  className="group relative min-h-44 overflow-hidden rounded-2xl bg-linear-to-b from-[#121b2f] via-[#10182a] to-[#0c1322] p-4 shadow-[0_30px_74px_-30px_rgba(2,6,15,0.95),0_16px_34px_-22px_rgba(96,146,255,0.45)] sm:min-h-52 sm:p-5"
+                  className="group relative min-h-44 overflow-hidden rounded-2xl bg-linear-to-b from-zinc-900/95 via-zinc-950 to-[#060607] p-4 shadow-[0_28px_68px_-28px_rgba(0,0,0,0.92)] ring-1 ring-inset ring-white/[0.06] sm:min-h-52 sm:p-5"
                   style={{ perspective: 1200 }}
                   onMouseEnter={() => {
                     clearApproachHoverResumeTimeout();
@@ -530,18 +424,15 @@ export function HomePageView({
                     aria-hidden
                   />
                   <div
-                    className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(160deg,rgba(255,255,255,0.08)_0%,rgba(255,255,255,0.01)_30%,rgba(7,17,35,0.24)_100%)]"
+                    className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(160deg,rgba(255,255,255,0.09)_0%,rgba(255,255,255,0.02)_32%,rgba(0,0,0,0.38)_100%)]"
                     aria-hidden
                   />
                   <div
-                    className={cn(
-                      'pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full blur-3xl',
-                      isWarm ? 'bg-orange-400/24' : 'bg-cyan-300/20'
-                    )}
+                    className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-white/[0.08] blur-3xl"
                     aria-hidden
                   />
                   <div
-                    className="pointer-events-none absolute -left-12 bottom-0 h-44 w-44 rounded-full bg-blue-400/10 blur-3xl"
+                    className="pointer-events-none absolute -left-12 bottom-0 h-44 w-44 rounded-full bg-white/[0.045] blur-3xl"
                     aria-hidden
                   />
 
@@ -561,10 +452,10 @@ export function HomePageView({
                       }}
                     >
                       <div className="flex items-baseline gap-2 sm:gap-2.5">
-                        <span className="font-display text-xl font-light tabular-nums text-zinc-500/80 sm:text-2xl">
+                        <span className="font-display text-xl font-medium tabular-nums text-zinc-500/85 sm:text-2xl">
                           {String(safeApproachIdx + 1).padStart(2, '0')}
                         </span>
-                        <h3 className="font-display text-[1.9rem] font-normal tracking-tight text-zinc-100 sm:text-[1.8rem]">
+                        <h3 className="font-display text-[1.9rem] font-semibold tracking-tight text-zinc-100 sm:text-[1.8rem]">
                           {approachItems[safeApproachIdx]?.title}
                         </h3>
                       </div>
@@ -589,11 +480,7 @@ export function HomePageView({
                           }}
                           className={cn(
                             'h-1.5 rounded-full transition-all',
-                            i === safeApproachIdx
-                              ? isWarm
-                                ? 'w-7 bg-orange-300/95'
-                                : 'w-7 bg-cyan-300/95'
-                              : 'w-3 bg-zinc-600/75 hover:bg-zinc-500'
+                            i === safeApproachIdx ? 'w-7 bg-zinc-200/90' : 'w-3 bg-zinc-600/75 hover:bg-zinc-500'
                           )}
                           aria-label={`Mostrar tópico ${i + 1}`}
                         />
@@ -609,7 +496,7 @@ export function HomePageView({
 
       <section
         id="servicos"
-        className="relative z-1 scroll-mt-24 bg-[linear-gradient(180deg,#131c2f_0%,#0f1629_18%,#111a2d_54%,#121c30_100%)] py-12 sm:py-16 lg:py-20"
+        className="lancurie-band-b relative z-1 scroll-mt-24 py-12 sm:py-16 lg:py-20"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-8 lg:px-12">
           <SectionHeading
@@ -635,7 +522,7 @@ export function HomePageView({
 
       <section
         id="prova"
-        className="relative z-1 scroll-mt-20 bg-[linear-gradient(180deg,#121c30_0%,#0f1728_28%,#0d1424_62%,#0d1321_100%)] py-12 sm:py-16"
+        className="lancurie-band-c relative z-1 scroll-mt-20 py-12 sm:py-16"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-8 lg:px-12">
           <SectionHeading
@@ -665,12 +552,7 @@ export function HomePageView({
                   >
                     <div className="mb-4 flex items-start justify-between gap-3">
                       <span className="text-[0.65rem] font-semibold uppercase tracking-wider text-zinc-500">{card.badge}</span>
-                      <div
-                        className={cn(
-                          'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-500/45 bg-zinc-950/65 transition-colors',
-                          isWarm ? 'text-orange-100/90' : 'text-cyan-100/85'
-                        )}
-                      >
+                      <div className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-500/45 bg-zinc-950/65 text-zinc-200">
                         <Icon className="h-5 w-5" strokeWidth={1.4} aria-hidden />
                       </div>
                     </div>
@@ -695,11 +577,7 @@ export function HomePageView({
                       }}
                       className={cn(
                         'h-1.5 rounded-full transition-all',
-                        i === proofMobileActiveIdx
-                          ? isWarm
-                            ? 'w-7 bg-orange-300/90'
-                            : 'w-7 bg-cyan-300/85'
-                          : 'w-3 bg-zinc-600/75'
+                        i === proofMobileActiveIdx ? 'w-7 bg-zinc-200/90' : 'w-3 bg-zinc-600/75'
                       )}
                       aria-label={`Mostrar projeto ${i + 1}`}
                       aria-current={i === proofMobileActiveIdx ? 'true' : undefined}
@@ -720,10 +598,7 @@ export function HomePageView({
                   whileInView="visible"
                   viewport={viewportOnce}
                   variants={fadeUp}
-                  className={cn(
-                    'group flex h-full w-[min(85vw,21rem)] shrink-0 flex-col rounded-2xl border border-zinc-500/38 bg-zinc-900/38 p-5 shadow-lg shadow-black/25 ring-1 ring-inset ring-white/5 transition-all duration-300 hover:bg-zinc-900/62 sm:w-auto sm:p-6',
-                    isWarm ? 'hover:border-orange-400/34' : 'hover:border-cyan-400/32'
-                  )}
+                  className="group flex h-full w-[min(85vw,21rem)] shrink-0 flex-col rounded-2xl border border-zinc-500/38 bg-zinc-900/38 p-5 shadow-lg shadow-black/25 ring-1 ring-inset ring-white/5 transition-all duration-300 hover:border-white/22 hover:bg-zinc-900/62 sm:w-auto sm:p-6"
                 >
                   <div className="mb-4 flex items-start justify-between gap-3">
                     <span
@@ -732,12 +607,7 @@ export function HomePageView({
                       {card.badge}
                     </span>
                     <div
-                      className={cn(
-                        'flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-500/45 bg-zinc-950/65 transition-colors',
-                        isWarm
-                          ? 'text-orange-100/90 group-hover:border-orange-400/38'
-                          : 'text-cyan-100/85 group-hover:border-cyan-400/38'
-                      )}
+                      className="flex h-11 w-11 shrink-0 items-center justify-center rounded-xl border border-zinc-500/45 bg-zinc-950/65 text-zinc-200 transition-colors group-hover:border-white/28"
                     >
                       <Icon className="h-5 w-5" strokeWidth={1.4} aria-hidden />
                     </div>

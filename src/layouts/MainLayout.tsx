@@ -14,7 +14,7 @@ export function MainLayout() {
   return (
     <div
       id="top"
-      className="relative flex min-h-screen flex-col bg-[radial-gradient(ellipse_120%_100%_at_50%_-8%,#222531_0%,#1b1d27_38%,#1b1d27_100%)] text-zinc-50 antialiased"
+      className="relative flex min-h-screen flex-col bg-[radial-gradient(ellipse_120%_95%_at_50%_-14%,rgba(255,255,255,0.065)_0%,#050506_42%,#030303_100%)] text-zinc-50 antialiased"
     >
       <ScrollToTop />
       <SiteVisitTracker />
@@ -24,7 +24,7 @@ export function MainLayout() {
         aria-hidden
       />
       {/* Cabeçalho preto sólido; o degradê para o fundo da página fica no topo do conteúdo (hero / primeira secção). */}
-      <div className="sticky top-0 z-50 border-b border-zinc-800/50 bg-[#050508] shadow-[0_1px_0_0_rgba(34,211,238,0.08),0_8px_32px_-8px_rgba(0,0,0,0.55)]">
+      <div className="sticky top-0 z-50 border-b border-zinc-800/55 bg-[#050508] shadow-[0_1px_0_0_rgba(255,255,255,0.06),0_8px_32px_-8px_rgba(0,0,0,0.65)]">
         <SiteHeader />
         {showMarketingSub ? <MarketingSubHeader /> : null}
       </div>

@@ -18,10 +18,10 @@ export const INITIAL_SITE_PUBLIC_CONTENT: SitePublicContent = {
     cases: 'Clientes e casos',
   },
   hero: {
-    kicker: 'Engenharia de produto · dados · IA quando faz sentido',
-    line1: 'Da operação caótica ao software que aguenta o dia a dia.',
+    kicker: '',
+    line1: 'Transformamos desafios operacionais em eficiência estratégica.',
     line2:
-      'Sem “IA de vitrine”: quando couber, produto e assinatura; quando não couber, projeto sob medida com manutenção; quando o escopo ainda for neblina, diagnóstico pago antes de código em massa.',
+      'Desenvolvemos soluções tecnológicas sob medida para empresas que buscam mais controle, agilidade e qualidade em seus processos.',
     subtitle:
       'Bloco editável no admin — use para prazo, stack, geografia e prova social. Este texto é placeholder até você ajustar no painel.',
     graphBrainLabel: '',
