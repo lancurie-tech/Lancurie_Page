@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useRef, useState } from 'react';
-import { AnimatePresence, motion, type PanInfo, useReducedMotion } from 'framer-motion';
+import { motion, useReducedMotion } from 'framer-motion';
 import { Activity, ChevronDown, Scissors, Store } from 'lucide-react';
+import { ApproachMethodFlow } from '@/components/home/ApproachMethodFlow';
 import { ServicesStack } from '@/components/home/ServicesStack';
 import { fadeUpVariants, staggerContainerVariants, viewportOnce } from '@/components/home/homeMotion';
 import type { SiteImageKey } from '@/data/siteImageConfig';
@@ -43,7 +44,6 @@ export function HomePageView({
         className="mx-auto mt-4 h-px w-36 rounded-full bg-linear-to-r from-transparent via-zinc-200/65 to-transparent sm:w-44"
         aria-hidden
       />
-      {/* Note: heading remains visually fixed; autoplay only affects approach element cards. */}
       {lead?.trim() ? (
         <p className="mx-auto mt-5 max-w-2xl text-pretty text-sm leading-relaxed text-zinc-300/92 sm:mt-6 sm:text-base">
           {lead}
@@ -65,16 +65,7 @@ export function HomePageView({
   const cardFallback = img('cardFallback');
   const fadeUp = fadeUpVariants(reduceMotion);
   const staggerHero = staggerContainerVariants(reduceMotion, 0.11);
-  const staggerApproach = staggerContainerVariants(reduceMotion, 0.16);
-  const [approachIdx, setApproachIdx] = useState(0);
-  const [approachPaused, setApproachPaused] = useState(false);
-  const [approachHoverPaused, setApproachHoverPaused] = useState(false);
-  const [approachTouchPaused, setApproachTouchPaused] = useState(false);
-  const [approachDirection, setApproachDirection] = useState<1 | -1>(1);
   const [proofMobileActiveIdx, setProofMobileActiveIdx] = useState(0);
-  const approachPauseTimeoutRef = useRef<number | null>(null);
-  const approachHoverResumeTimeoutRef = useRef<number | null>(null);
-  const approachTouchResumeTimeoutRef = useRef<number | null>(null);
   const proofMobileRailRef = useRef<HTMLDivElement | null>(null);
   const homeProducts = useMemo<Product[]>(
     () =>
@@ -99,48 +90,6 @@ export function HomePageView({
   );
   const approachItems = p.principles.items;
   const proofItems = p.proof.cards;
-  const safeApproachIdx = approachItems.length > 0 ? approachIdx % approachItems.length : 0;
-  const isTouchLike = () => typeof window !== 'undefined' && window.matchMedia('(hover: none)').matches;
-  const goNextApproach = () => {
-    if (approachItems.length <= 1) return;
-    setApproachDirection(1);
-    setApproachIdx((i) => (i + 1) % approachItems.length);
-  };
-  const goPrevApproach = () => {
-    if (approachItems.length <= 1) return;
-    setApproachDirection(-1);
-    setApproachIdx((i) => (i - 1 + approachItems.length) % approachItems.length);
-  };
-  const pauseApproachFor = (ms: number) => {
-    setApproachPaused(true);
-    if (approachPauseTimeoutRef.current != null) {
-      window.clearTimeout(approachPauseTimeoutRef.current);
-    }
-    approachPauseTimeoutRef.current = window.setTimeout(() => {
-      setApproachPaused(false);
-      approachPauseTimeoutRef.current = null;
-    }, ms);
-  };
-  const clearApproachHoverResumeTimeout = () => {
-    if (approachHoverResumeTimeoutRef.current != null) {
-      window.clearTimeout(approachHoverResumeTimeoutRef.current);
-      approachHoverResumeTimeoutRef.current = null;
-    }
-  };
-  const clearApproachTouchResumeTimeout = () => {
-    if (approachTouchResumeTimeoutRef.current != null) {
-      window.clearTimeout(approachTouchResumeTimeoutRef.current);
-      approachTouchResumeTimeoutRef.current = null;
-    }
-  };
-  useEffect(() => {
-    if (reduceMotion || approachPaused || approachHoverPaused || approachTouchPaused || approachItems.length <= 1) return;
-    const t = window.setInterval(() => {
-      setApproachDirection(1);
-      setApproachIdx((i) => (i + 1) % approachItems.length);
-    }, 3000);
-    return () => window.clearInterval(t);
-  }, [approachHoverPaused, approachPaused, approachItems.length, approachTouchPaused, reduceMotion]);
 
   useEffect(() => {
     const root = proofMobileRailRef.current;
@@ -188,23 +137,6 @@ export function HomePageView({
     };
   }, [proofItems.length]);
 
-  useEffect(() => {
-    return () => {
-      if (approachPauseTimeoutRef.current != null) {
-        window.clearTimeout(approachPauseTimeoutRef.current);
-      }
-      clearApproachHoverResumeTimeout();
-      clearApproachTouchResumeTimeout();
-    };
-  }, []);
-
-  const onApproachDragEnd = (_e: MouseEvent | TouchEvent | PointerEvent, info: PanInfo) => {
-    if (approachItems.length <= 1) return;
-    if (Math.abs(info.offset.x) < 42) return;
-    pauseApproachFor(5000);
-    if (info.offset.x < 0) goNextApproach();
-    else goPrevApproach();
-  };
   const paletteTone = useMemo<PaletteTone>(() => {
     if (typeof window !== 'undefined') {
       const params = new URLSearchParams(window.location.search);
@@ -310,187 +242,18 @@ export function HomePageView({
         />
       <section
         id="approach"
-        className="lancurie-band-a relative z-1 scroll-mt-24 py-12 sm:py-16 lg:py-20"
+        className="relative z-1 scroll-mt-24 bg-[#050505] py-12 sm:py-16 lg:py-20"
       >
-        <div className="mx-auto max-w-6xl px-4 sm:px-8 lg:px-12">
-          <SectionHeading
-            title={p.principles.title}
-            lead={p.principles.lead}
-            eyebrow="Método Lancurie"
-            className="mb-7 sm:mb-9"
-          />
-          <div className="grid gap-10 lg:grid-cols-12 lg:gap-14">
-            <motion.div
-              className="lg:col-span-4 lg:pt-1"
-              variants={fadeUp}
-              initial="hidden"
-              whileInView="visible"
-              viewport={viewportOnce}
-            >
-              {approachItems.length > 1 ? (
-                <div className="mt-7 hidden lg:flex lg:flex-col lg:gap-2.5">
-                  {approachItems.map((item, i) => {
-                    const active = i === safeApproachIdx;
-                    return (
-                        <button
-                        key={`approach-nav-${i}`}
-                        type="button"
-                          onClick={() => {
-                            pauseApproachFor(5000);
-                            setApproachDirection(i >= safeApproachIdx ? 1 : -1);
-                            setApproachIdx(i);
-                          }}
-                        className={cn(
-                          'flex items-start gap-2 rounded-lg border px-3 py-2 text-left transition-all duration-300',
-                          active
-                            ? 'border-white/28 bg-white/[0.09] text-zinc-50'
-                            : 'border-zinc-700/60 bg-zinc-900/25 text-zinc-400 hover:border-zinc-600 hover:text-zinc-200'
-                        )}
-                        aria-label={`Mostrar etapa ${i + 1}`}
-                      >
-                        <span
-                          className={cn(
-                            'font-display text-sm tabular-nums',
-                            active ? 'text-zinc-200' : 'text-zinc-500'
-                          )}
-                        >
-                          {String(i + 1).padStart(2, '0')}
-                        </span>
-                        <span className="line-clamp-2 text-[0.8rem] font-medium leading-snug">{item.title}</span>
-                      </button>
-                    );
-                  })}
-                </div>
-              ) : null}
-            </motion.div>
-            <motion.div
-              className="lg:col-span-8"
-              variants={staggerApproach}
-              initial="hidden"
-              whileInView="visible"
-              viewport={viewportOnce}
-            >
-              <motion.div variants={fadeUp} className="relative">
-                <div
-                  className="group relative min-h-44 overflow-hidden rounded-2xl bg-linear-to-b from-zinc-900/95 via-zinc-950 to-[#060607] p-4 shadow-[0_28px_68px_-28px_rgba(0,0,0,0.92)] ring-1 ring-inset ring-white/[0.06] sm:min-h-52 sm:p-5"
-                  style={{ perspective: 1200 }}
-                  onMouseEnter={() => {
-                    clearApproachHoverResumeTimeout();
-                    setApproachHoverPaused(true);
-                  }}
-                  onMouseLeave={() => {
-                    clearApproachHoverResumeTimeout();
-                    approachHoverResumeTimeoutRef.current = window.setTimeout(() => {
-                      setApproachHoverPaused(false);
-                      approachHoverResumeTimeoutRef.current = null;
-                    }, 1000);
-                  }}
-                  onPointerDown={(event) => {
-                    if (event.pointerType === 'touch') {
-                      clearApproachTouchResumeTimeout();
-                      setApproachTouchPaused(true);
-                    }
-                  }}
-                  onPointerUp={(event) => {
-                    if (event.pointerType === 'touch') {
-                      clearApproachTouchResumeTimeout();
-                      approachTouchResumeTimeoutRef.current = window.setTimeout(() => {
-                        setApproachTouchPaused(false);
-                        approachTouchResumeTimeoutRef.current = null;
-                      }, 1000);
-                    }
-                  }}
-                  onPointerCancel={(event) => {
-                    if (event.pointerType === 'touch') {
-                      clearApproachTouchResumeTimeout();
-                      approachTouchResumeTimeoutRef.current = window.setTimeout(() => {
-                        setApproachTouchPaused(false);
-                        approachTouchResumeTimeoutRef.current = null;
-                      }, 1000);
-                    }
-                  }}
-                  onPointerLeave={(event) => {
-                    if (event.pointerType === 'touch') {
-                      clearApproachTouchResumeTimeout();
-                      approachTouchResumeTimeoutRef.current = window.setTimeout(() => {
-                        setApproachTouchPaused(false);
-                        approachTouchResumeTimeoutRef.current = null;
-                      }, 1000);
-                    }
-                  }}
-                >
-                  <div
-                    className="pointer-events-none absolute inset-x-3 top-1.5 h-10 rounded-full bg-white/8 blur-xl"
-                    aria-hidden
-                  />
-                  <div
-                    className="pointer-events-none absolute inset-0 rounded-2xl bg-[linear-gradient(160deg,rgba(255,255,255,0.09)_0%,rgba(255,255,255,0.02)_32%,rgba(0,0,0,0.38)_100%)]"
-                    aria-hidden
-                  />
-                  <div
-                    className="pointer-events-none absolute -right-10 top-0 h-40 w-40 rounded-full bg-white/[0.08] blur-3xl"
-                    aria-hidden
-                  />
-                  <div
-                    className="pointer-events-none absolute -left-12 bottom-0 h-44 w-44 rounded-full bg-white/[0.045] blur-3xl"
-                    aria-hidden
-                  />
-
-                  <AnimatePresence mode="wait">
-                    <motion.article
-                      key={`approach-${safeApproachIdx}-${approachItems[safeApproachIdx]?.title ?? 'empty'}`}
-                      initial={reduceMotion ? { opacity: 0 } : { opacity: 0, x: approachDirection > 0 ? 44 : -44, scale: 0.985 }}
-                      animate={reduceMotion ? { opacity: 1 } : { opacity: 1, x: 0, scale: 1 }}
-                      exit={reduceMotion ? { opacity: 0 } : { opacity: 0, x: approachDirection > 0 ? -44 : 44, scale: 0.985 }}
-                      transition={{ duration: reduceMotion ? 0.25 : 0.56, ease: [0.22, 1, 0.36, 1] }}
-                      className="relative origin-center"
-                      drag={isTouchLike() && approachItems.length > 1 ? 'x' : false}
-                      dragConstraints={{ left: 0, right: 0 }}
-                      dragElastic={0.14}
-                      onDragEnd={(event, info) => {
-                        onApproachDragEnd(event, info);
-                      }}
-                    >
-                      <div className="flex items-baseline gap-2 sm:gap-2.5">
-                        <span className="font-display text-xl font-medium tabular-nums text-zinc-500/85 sm:text-2xl">
-                          {String(safeApproachIdx + 1).padStart(2, '0')}
-                        </span>
-                        <h3 className="font-display text-[1.9rem] font-semibold tracking-tight text-zinc-100 sm:text-[1.8rem]">
-                          {approachItems[safeApproachIdx]?.title}
-                        </h3>
-                      </div>
-                      <p className="mt-2 max-w-2xl text-justify text-[0.9rem] leading-relaxed text-zinc-300/88 sm:text-[0.94rem]">
-                        {approachItems[safeApproachIdx]?.body}
-                      </p>
-                    </motion.article>
-                  </AnimatePresence>
-                </div>
-
-                {approachItems.length > 1 ? (
-                  <div className="mt-4 flex items-center justify-center">
-                    <div className="flex items-center gap-2.5">
-                      {approachItems.map((_, i) => (
-                        <button
-                          key={`approach-dot-${i}`}
-                          type="button"
-                          onClick={() => {
-                            pauseApproachFor(5000);
-                            setApproachDirection(i >= safeApproachIdx ? 1 : -1);
-                            setApproachIdx(i);
-                          }}
-                          className={cn(
-                            'h-1.5 rounded-full transition-all',
-                            i === safeApproachIdx ? 'w-7 bg-zinc-200/90' : 'w-3 bg-zinc-600/75 hover:bg-zinc-500'
-                          )}
-                          aria-label={`Mostrar tópico ${i + 1}`}
-                        />
-                      ))}
-                    </div>
-                  </div>
-                ) : null}
-              </motion.div>
-            </motion.div>
-          </div>
+        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:pl-6 lg:pr-14 xl:pl-8 xl:pr-16">
+          <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewportOnce}>
+            <ApproachMethodFlow
+              eyebrow="Método Lancurie"
+              title={p.principles.title}
+              lead={p.principles.lead}
+              items={approachItems}
+              reduceMotion={!!reduceMotion}
+            />
+          </motion.div>
         </div>
       </section>
 
