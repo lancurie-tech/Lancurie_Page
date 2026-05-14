@@ -36,8 +36,9 @@ export function OfferingCard({
   className,
   detailHref,
   ctaLabel,
-  accentTone: _accentTone = 'cool',
+  accentTone = 'cool',
 }: OfferingCardProps) {
+  void accentTone;
   const cardRef = useRef<HTMLElement | null>(null);
   const teaserMode = variant === 'teaser';
 
