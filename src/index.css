@@ -219,6 +219,44 @@ html[data-theme='light'] body {
   }
 }
 
+@keyframes lancurie-orbit-ambient {
+  0%,
+  100% {
+    opacity: 0.86;
+    transform: translate3d(0, 0, 0) scale(1);
+  }
+  50% {
+    opacity: 0.995;
+    transform: translate3d(-0.4%, -0.18%, 0) scale(1.012);
+  }
+}
+
+/* Feixe orbital “energia” — só quando ativo; respeita prefers-reduced-motion pelo React */
+@keyframes lancurie-orbit-beam-drift {
+  to {
+    stroke-dashoffset: -48;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lancurie-orbit-panel svg .lancurie-orbit-beam-energy {
+    animation: lancurie-orbit-beam-drift 5.5s linear infinite;
+  }
+}
+
+/** Malha secundária entre nós — fluxo muito lento */
+@keyframes lancurie-orbit-weave-drift {
+  to {
+    stroke-dashoffset: -22;
+  }
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .lancurie-orbit-panel svg .lancurie-orbit-weave-energy {
+    animation: lancurie-orbit-weave-drift 42s linear infinite;
+  }
+}
+
 /* Faixas da home — preto neutro + focos de luz branca (sem azul editorial) */
 .lancurie-band-a {
   background:
