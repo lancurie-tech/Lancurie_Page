@@ -282,6 +282,11 @@ html[data-theme='light'] body {
     linear-gradient(180deg, #070708 0%, #030303 55%, #060606 100%);
 }
 
+/* Home — faixa Serviços: um único off-white (evita faixa “branca” vs crema). */
+.lancurie-home-services-surface {
+  background-color: #f2f2eb;
+}
+
 /* Autofill em superfícies escuras — manter contraste sem o azul claro do Chrome */
 .lancurie-dark-input:-webkit-autofill,
 .lancurie-dark-input:-webkit-autofill:hover,
