@@ -36,7 +36,7 @@ export type ApproachMethodFlowProps = {
 const VB = { w: 680, h: 540, cx: 376, cy: 282, hubR: 42 };
 
 /** Teto de escala em colunas muito largas (evita núcleo desproporcionado). */
-const ORBIT_SCALE_MAX = 2.35;
+const ORBIT_SCALE_MAX = 2.55;
 
 /** `VB.cx` está ~36px à direita do centro do viewBox; em coluna empilhada corrige-se para centrar o diagrama. */
 const ORBIT_HUB_PAN_X_STACKED = VB.w / 2 - VB.cx;
@@ -414,7 +414,7 @@ const SatelliteDisc = forwardRef<HTMLSpanElement, { index: number; active: boole
     <span
       ref={ref}
       className={cn(
-        'relative isolate flex size-14 shrink-0 items-center justify-center rounded-full md:size-[3.95rem]',
+        'relative isolate flex size-14 shrink-0 items-center justify-center rounded-full md:size-[3.95rem] lg:size-[4.35rem] xl:size-[4.65rem]',
         // Satélite “vidro” — highlight superior + bloom exterior (referência brilhosa)
         'border border-white/42 bg-[radial-gradient(circle_at_32%_22%,rgba(255,252,244,0.11),transparent_38%),radial-gradient(circle_at_50%_108%,rgba(255,251,239,0.065),transparent_44%),linear-gradient(168deg,rgb(12_13_16)_0%,rgb(5_6_8)_52%,rgb(2_3_4)_100%)]',
         'shadow-[inset_0_-4px_10px_rgb(0_0_0/0.94),inset_0_0_0_1px_rgb(255_255_255/0.12),inset_0_1px_0_rgb(255_255_255/0.06),0_0_0_1px_rgb(255_250_245/0.14),0_0_28px_-3px_rgb(255_251_243/0.38),0_0_52px_-14px_rgb(255_250_245/0.22)]',
@@ -429,7 +429,7 @@ const SatelliteDisc = forwardRef<HTMLSpanElement, { index: number; active: boole
     >
       <span
         className={cn(
-          'relative z-1 font-display text-[0.88rem] font-medium tabular-nums tracking-tight md:text-[0.935rem]',
+          'relative z-1 font-display text-[0.88rem] font-medium tabular-nums tracking-tight md:text-[0.935rem] lg:text-[1.02rem] xl:text-[1.08rem]',
           active ? 'text-white' : 'text-zinc-300/95',
         )}
       >
@@ -459,7 +459,7 @@ function StepTexts({
           'block text-left font-display font-semibold leading-snug tracking-[-0.03em] text-zinc-100',
           comfortable
             ? 'text-[1.035rem] leading-snug md:text-[1.06rem]'
-            : 'text-[0.905rem] md:text-[0.965rem]',
+            : 'text-[0.905rem] md:text-[0.965rem] lg:text-[1.05rem] xl:text-[1.1rem]',
           'motion-safe:transition-colors motion-safe:duration-500',
           isHot && 'text-white',
         )}
@@ -473,7 +473,7 @@ function StepTexts({
             'mt-1.5 block max-w-none text-pretty text-left font-extralight tracking-[-0.006em]',
             comfortable
               ? 'text-[0.9rem] leading-[1.58] md:text-[0.91rem]'
-              : 'text-[0.675rem] leading-relaxed md:text-[0.705rem]',
+              : 'text-[0.675rem] leading-relaxed md:text-[0.705rem] lg:text-[0.8rem] xl:text-[0.85rem]',
             'motion-safe:transition-[color,text-shadow] motion-safe:duration-500 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]',
             isHot
               ? 'text-zinc-200/95 [text-shadow:0_1px_32px_rgb(0_0_0/0.45)]'
@@ -524,10 +524,10 @@ function OrbitSatelliteChrome({
   return (
     <div
       className={cn(
-        'relative flex w-max max-w-none flex-row items-center gap-2.5 py-0.5 md:gap-3.5',
+        'relative flex w-max max-w-none flex-row items-center gap-2.5 py-0.5 md:gap-3.5 lg:gap-4',
         inlineMirror && 'flex-row-reverse',
-        !inlineMirror && '-ml-7 md:-ml-[1.975rem]',
-        'min-h-[4.05rem] md:min-h-[4.35rem]',
+        !inlineMirror && '-ml-7 md:-ml-[1.975rem] lg:-ml-8.5 xl:-ml-9',
+        'min-h-[4.05rem] md:min-h-[4.35rem] lg:min-h-[4.85rem]',
         'max-w-[min(100%,calc(100vw-1.25rem))] lg:max-w-none',
       )}
     >
@@ -536,9 +536,9 @@ function OrbitSatelliteChrome({
         className={cn(
           // shrink-0 + largura mínima: evita colapso ~80px (abspos shrink-to-fit + min-w-0 no flex).
           'shrink-0 text-left',
-          'min-w-54 sm:min-w-60 md:min-w-[16rem] lg:min-w-[20rem] xl:min-w-88',
+          'min-w-54 sm:min-w-60 md:min-w-[16rem] lg:min-w-88 xl:min-w-96 2xl:min-w-104',
           'max-w-[min(15.25rem,calc(100vw-10rem))] sm:max-w-[min(16.5rem,calc(100vw-10rem))] md:max-w-[min(17.5rem,calc(100vw-11rem))]',
-          'lg:max-w-88 xl:max-w-96',
+          'lg:max-w-88 xl:max-w-96 2xl:max-w-md',
         )}
       >
         {copy}
@@ -669,16 +669,16 @@ export function ApproachMethodFlow({
   return (
     <div
       role="region"
-      className="@container grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-x-10 lg:gap-y-14 xl:gap-x-14"
+      className="@container grid gap-10 lg:grid-cols-12 lg:items-center lg:gap-x-10 lg:gap-y-14 xl:gap-x-14 xl:gap-y-14 2xl:gap-x-16 2xl:gap-y-16"
       aria-labelledby={headingId}
     >
       <div className="min-w-0 lg:col-span-5 lg:-translate-y-5 lg:justify-self-start xl:-translate-y-7">
-        <p className="text-[0.64rem] font-semibold uppercase tracking-[0.31em] text-zinc-500">
+        <p className="text-[0.64rem] font-semibold uppercase tracking-[0.31em] text-zinc-500 lg:text-[0.72rem] lg:tracking-[0.28em] xl:text-[0.76rem]">
           {eyebrow}
         </p>
         <h2
           id={headingId}
-          className="mt-5 max-w-[min(13.75rem,calc(100%-0.25rem))] text-pretty font-display text-[1.92rem] font-semibold leading-[1.04] tracking-[-0.034em] text-zinc-50 sm:mt-6 sm:max-w-59 sm:text-[2.2rem] sm:leading-[1.06] md:mt-7 md:max-w-63 md:text-[2.55rem]"
+          className="mt-5 max-w-[min(13.75rem,calc(100%-0.25rem))] text-pretty font-display text-[1.92rem] font-semibold leading-[1.04] tracking-[-0.034em] text-zinc-50 sm:mt-6 sm:max-w-59 sm:text-[2.2rem] sm:leading-[1.06] md:mt-7 md:max-w-63 md:text-[2.55rem] lg:max-w-lg lg:text-[2.92rem] lg:leading-[1.03] xl:max-w-xl xl:text-[3.2rem] 2xl:text-[3.4rem]"
         >
           {processSplit ? (
             <>
@@ -690,10 +690,10 @@ export function ApproachMethodFlow({
           )}
         </h2>
         <div
-          className="mt-6 h-px w-full max-w-[min(16.5rem,calc(100%-0.5rem))] bg-linear-to-r from-transparent via-zinc-400/42 to-transparent sm:mt-7 md:max-w-71"
+          className="mt-6 h-px w-full max-w-[min(16.5rem,calc(100%-0.5rem))] bg-linear-to-r from-transparent via-zinc-400/42 to-transparent sm:mt-7 md:max-w-71 lg:max-w-xl xl:max-w-2xl"
           aria-hidden
         />
-        <p className="mt-7 max-w-lg text-pretty text-[0.92rem] font-light leading-relaxed tracking-[-0.01em] text-zinc-300/93 sm:mt-7.5 sm:text-[0.98rem] md:mt-9">
+        <p className="mt-7 max-w-lg text-pretty text-[0.92rem] font-light leading-relaxed tracking-[-0.01em] text-zinc-300/93 sm:mt-7.5 sm:text-[0.98rem] md:mt-9 lg:max-w-xl lg:text-[1.04rem] lg:leading-[1.65] xl:max-w-2xl xl:text-[1.08rem]">
           {leadDisplayed}
         </p>
       </div>
@@ -702,7 +702,7 @@ export function ApproachMethodFlow({
         <div className="relative w-full origin-center">
         <div
           className={cn(
-            'lancurie-orbit-panel relative isolate min-h-0 w-full min-w-0 overflow-x-visible bg-[#050505] px-1 pb-9 pt-[8%] sm:px-2 sm:pb-10 sm:pt-[9%] lg:max-h-none lg:min-h-[clamp(27.5rem,min(76cqw),38.5rem)] lg:pb-16',
+            'lancurie-orbit-panel relative isolate min-h-0 w-full min-w-0 overflow-x-visible bg-[#050505] px-1 pb-9 pt-[8%] sm:px-2 sm:pb-10 sm:pt-[9%] lg:max-h-none lg:min-h-[clamp(27.5rem,min(76cqw),39.25rem)] lg:pb-16 xl:min-h-[clamp(28.75rem,min(74cqw),42.25rem)] 2xl:min-h-[clamp(29.25rem,min(71cqw),44rem)]',
             !stackSatelliteCopy && 'sm:min-h-120',
           )}
         >
@@ -807,22 +807,22 @@ export function ApproachMethodFlow({
             >
               {/* Halo suave atrás do núcleo — corona luminosa */}
               <div
-                className="pointer-events-none absolute left-1/2 top-1/2 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,252,248,0.16)_0%,rgba(255,248,242,0.05)_35%,transparent_68%)] blur-[1.5px] h-54 w-54 md:h-60 md:w-60"
+                className="pointer-events-none absolute left-1/2 top-1/2 h-54 w-54 -translate-x-1/2 -translate-y-1/2 rounded-full bg-[radial-gradient(circle,rgba(255,252,248,0.16)_0%,rgba(255,248,242,0.05)_35%,transparent_68%)] blur-[1.5px] md:h-60 md:w-60 lg:h-69 lg:w-69 xl:h-73 xl:w-73"
                 aria-hidden
               />
               {/* Anéis muito sutis ao redor do poço */}
               <div
                 className={cn(
                   'pointer-events-none absolute left-1/2 top-1/2 aspect-square w-47 -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/9',
-                  'opacity-[0.48] md:w-52.5',
+                  'opacity-[0.48] md:w-52.5 lg:w-56.5 xl:w-60',
                 )}
               />
-              <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[9.65rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/11 opacity-[0.36] md:w-44" />
+              <div className="pointer-events-none absolute left-1/2 top-1/2 aspect-square w-[9.65rem] -translate-x-1/2 -translate-y-1/2 rounded-full border border-white/11 opacity-[0.36] md:w-44 lg:w-48.5 xl:w-51.5" />
 
               {/* Poço único — preto sólido, bordo nítido (referência) */}
               <div
                 className={cn(
-                  'relative z-3 flex size-24 items-center justify-center rounded-full md:size-[6.85rem]',
+                  'relative z-3 flex size-24 items-center justify-center rounded-full md:size-[6.85rem] lg:size-30.5 xl:size-32',
                   'bg-black border border-[rgb(248_245_239)]/96 shadow-[0_0_28px_-4px_rgb(255_252_248/0.35),0_0_0_1px_rgb(255_255_255/0.12)]',
                   'motion-safe:transition-colors motion-safe:duration-700 motion-safe:ease-[cubic-bezier(0.22,1,0.36,1)]',
                   hoverIdx !== null && 'border-white',
@@ -856,7 +856,7 @@ export function ApproachMethodFlow({
                   ? 'translateX(calc(-50% - 1.875rem))'
                   : 'translateX(-50%)'
                 : inlineMirror
-                  ? 'translateY(-50%) translateX(calc(-100% + 1.975rem))'
+                  ? 'translateY(-50%) translateX(calc(-100% + clamp(1.975rem,1.05rem + 2.05vw,2.38rem)))'
                   : 'translateY(-50%)';
 
               return (

@@ -22,6 +22,11 @@ type OfferingCardProps = {
   detailHref?: string;
   ctaLabel?: string;
   accentTone?: 'cool' | 'warm';
+  /**
+   * No carrossel (variant teaser): véu escuro fosco quando o cartão está em pé de ilha
+   * (evita lavado sobre fundos claros atrás das laterais semi-transparentes).
+   */
+  teaserSideDim?: boolean;
 };
 
 export function OfferingCard({
@@ -37,6 +42,7 @@ export function OfferingCard({
   detailHref,
   ctaLabel,
   accentTone = 'cool',
+  teaserSideDim = false,
 }: OfferingCardProps) {
   void accentTone;
   const cardRef = useRef<HTMLElement | null>(null);
@@ -104,6 +110,12 @@ export function OfferingCard({
               className="pointer-events-none absolute inset-0 ring-1 ring-inset ring-white/5"
               aria-hidden
             />
+            {teaserMode && teaserSideDim ? (
+              <div
+                className="pointer-events-none absolute inset-0 z-1 rounded-2xl bg-zinc-950/58 backdrop-blur-[6px] sm:rounded-[1.35rem]"
+                aria-hidden
+              />
+            ) : null}
           </>
         ) : (
           <>

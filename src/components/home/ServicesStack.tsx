@@ -280,7 +280,7 @@ export function ServicesStack({
           className={cn(
             'group relative inline-flex items-center overflow-hidden rounded-xl border px-5 py-2.5 text-sm font-semibold transition-all duration-300',
             surface === 'light'
-              ? 'border-zinc-800/25 bg-[#e8e8e0] text-zinc-900 shadow-[0_10px_28px_-14px_rgba(0,0,0,0.14)] ring-1 ring-inset ring-zinc-900/6 hover:-translate-y-0.5 hover:border-zinc-800/40 hover:bg-[#e2e2da] hover:shadow-[0_16px_36px_-16px_rgba(0,0,0,0.18)]'
+              ? 'border-black/95 bg-black text-white shadow-[0_14px_32px_-16px_rgba(0,0,0,0.35)] ring-1 ring-inset ring-white/12 hover:-translate-y-0.5 hover:bg-zinc-950 hover:border-white/25 hover:shadow-[0_18px_40px_-18px_rgba(0,0,0,0.42)]'
               : 'border-white/22 bg-linear-to-b from-zinc-900/88 via-zinc-950/84 to-[#060607]/92 text-zinc-100 shadow-[0_14px_34px_-18px_rgba(0,0,0,0.78)] ring-1 ring-inset ring-white/[0.07] hover:-translate-y-0.5 hover:border-white/38 hover:shadow-[0_22px_42px_-20px_rgba(0,0,0,0.85)]'
           )}
         >
@@ -288,7 +288,7 @@ export function ServicesStack({
             className={cn(
               'pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100',
               surface === 'light'
-                ? 'bg-[radial-gradient(130%_95%_at_50%_0%,rgba(0,0,0,0.05),transparent_62%)]'
+                ? 'bg-[radial-gradient(130%_95%_at_50%_0%,rgba(255,255,255,0.16),transparent_62%)]'
                 : 'bg-[radial-gradient(130%_95%_at_50%_0%,rgba(255,255,255,0.14),transparent_62%)]'
             )}
             aria-hidden

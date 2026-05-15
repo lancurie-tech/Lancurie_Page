@@ -50,8 +50,8 @@ export function HomePageView({
       </p>
       <h2
         className={cn(
-          'mt-3 text-balance font-display text-[1.95rem] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[2.4rem] md:text-[2.85rem]',
-          tone === 'light' ? 'text-zinc-950' : 'text-zinc-50'
+          'mt-3 text-balance font-display text-[1.95rem] leading-[1.08] tracking-[-0.03em] sm:text-[2.4rem] md:text-[2.85rem]',
+          tone === 'light' ? 'font-bold text-zinc-950' : 'font-semibold text-zinc-50'
         )}
       >
         {title}
@@ -270,7 +270,7 @@ export function HomePageView({
         id="approach"
         className="relative z-10 scroll-mt-24 bg-[#050505] py-12 sm:py-16 lg:py-20"
       >
-        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:pl-6 lg:pr-14 xl:pl-8 xl:pr-16">
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:pl-6 lg:pr-14 xl:max-w-7xl xl:pl-8 xl:pr-16 2xl:max-w-360 2xl:pl-10 2xl:pr-19">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewportOnce}>
             <ApproachMethodFlow
               eyebrow="Método Lancurie"
