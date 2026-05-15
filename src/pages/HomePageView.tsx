@@ -2,6 +2,7 @@ import { useEffect, useMemo, useRef, useState } from 'react';
 import { motion, useReducedMotion } from 'framer-motion';
 import { Activity, ChevronDown, Scissors, Store } from 'lucide-react';
 import { ApproachMethodFlow } from '@/components/home/ApproachMethodFlow';
+import { ServicesCurvedDividers } from '@/components/home/ServicesCurvedDividers';
 import { ServicesStack } from '@/components/home/ServicesStack';
 import { fadeUpVariants, staggerContainerVariants, viewportOnce } from '@/components/home/homeMotion';
 import type { SiteImageKey } from '@/data/siteImageConfig';
@@ -29,23 +30,46 @@ export function HomePageView({
     lead,
     eyebrow,
     className,
+    tone = 'dark',
   }: {
     title: string;
     lead?: string;
     eyebrow?: string;
     className?: string;
+    /** `light` = fundo claro (texto escuro). */
+    tone?: 'dark' | 'light';
   }) => (
     <div className={cn('mx-auto max-w-3xl text-center', className)}>
-      <p className="text-[0.64rem] font-semibold uppercase tracking-[0.26em] text-zinc-500">{eyebrow}</p>
-      <h2 className="mt-3 text-balance font-display text-[1.95rem] font-semibold leading-[1.08] tracking-[-0.03em] text-zinc-50 sm:text-[2.4rem] md:text-[2.85rem]">
+      <p
+        className={cn(
+          'text-[0.64rem] font-semibold uppercase tracking-[0.26em]',
+          tone === 'light' ? 'text-zinc-600' : 'text-zinc-500'
+        )}
+      >
+        {eyebrow}
+      </p>
+      <h2
+        className={cn(
+          'mt-3 text-balance font-display text-[1.95rem] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[2.4rem] md:text-[2.85rem]',
+          tone === 'light' ? 'text-zinc-950' : 'text-zinc-50'
+        )}
+      >
         {title}
       </h2>
       <div
-        className="mx-auto mt-4 h-px w-36 rounded-full bg-linear-to-r from-transparent via-zinc-200/65 to-transparent sm:w-44"
+        className={cn(
+          'mx-auto mt-4 h-px w-36 rounded-full bg-linear-to-r from-transparent to-transparent sm:w-44',
+          tone === 'light' ? 'via-zinc-400/55' : 'via-zinc-200/65'
+        )}
         aria-hidden
       />
       {lead?.trim() ? (
-        <p className="mx-auto mt-5 max-w-2xl text-pretty text-sm leading-relaxed text-zinc-300/92 sm:mt-6 sm:text-base">
+        <p
+          className={cn(
+            'mx-auto mt-5 max-w-2xl text-pretty text-sm leading-relaxed sm:mt-6 sm:text-base',
+            tone === 'light' ? 'text-zinc-700' : 'text-zinc-300/92'
+          )}
+        >
           {lead}
         </p>
       ) : null}
@@ -152,12 +176,14 @@ export function HomePageView({
     document.documentElement.setAttribute('data-lancurie-palette', paletteTone);
   }, [paletteTone]);
 
+  const scrollHintLabel = p.hero.scrollHint.trim() || 'Explorar';
+
   const scrollHint = (
     <a
       href="#approach"
       className="flex flex-col items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-zinc-400 transition-colors hover:text-zinc-200"
     >
-      {p.hero.scrollHint}
+      {scrollHintLabel}
       <ChevronDown className="h-4 w-4 text-zinc-600 motion-safe:animate-bounce" aria-hidden />
     </a>
   );
@@ -242,9 +268,9 @@ export function HomePageView({
         />
       <section
         id="approach"
-        className="relative z-1 scroll-mt-24 bg-[#050505] py-12 sm:py-16 lg:py-20"
+        className="relative z-10 scroll-mt-24 bg-[#050505] py-12 sm:py-16 lg:py-20"
       >
-        <div className="mx-auto max-w-6xl px-4 sm:px-6 lg:pl-6 lg:pr-14 xl:pl-8 xl:pr-16">
+        <div className="relative mx-auto max-w-6xl px-4 sm:px-6 lg:pl-6 lg:pr-14 xl:pl-8 xl:pr-16">
           <motion.div variants={fadeUp} initial="hidden" whileInView="visible" viewport={viewportOnce}>
             <ApproachMethodFlow
               eyebrow="Método Lancurie"
@@ -259,21 +285,24 @@ export function HomePageView({
 
       <section
         id="servicos"
-        className="lancurie-band-b relative z-1 scroll-mt-24 py-12 sm:py-16 lg:py-20"
+        className="lancurie-home-services-surface relative z-10 scroll-mt-24 py-12 sm:py-16 lg:py-20"
       >
-        <div className="mx-auto max-w-6xl px-4 sm:px-8 lg:px-12">
+        <ServicesCurvedDividers />
+        <div className="relative z-2 mx-auto max-w-6xl px-4 sm:px-8 lg:px-12">
           <SectionHeading
             title={p.services.title}
             lead={p.services.lead}
             eyebrow="Portfólio de soluções"
             className="mb-8 sm:mb-10"
+            tone="light"
           />
           <ServicesStack
             products={homeProducts}
             cardFallback={cardFallback}
             ctaLabel={p.services.cta}
             accentTone={paletteTone}
-            emptyMessage={<p className="text-sm leading-relaxed text-zinc-400">{p.services.empty}</p>}
+            surface="light"
+            emptyMessage={<p className="text-sm leading-relaxed text-zinc-600">{p.services.empty}</p>}
             onEmptyCta={() => {
               if (typeof window === 'undefined') return;
               window.dispatchEvent(new CustomEvent('lancurie:open-chat'));
@@ -285,7 +314,7 @@ export function HomePageView({
 
       <section
         id="prova"
-        className="lancurie-band-c relative z-1 scroll-mt-20 py-12 sm:py-16"
+        className="relative z-10 scroll-mt-20 bg-[#050505] py-12 sm:py-16"
       >
         <div className="mx-auto max-w-6xl px-4 sm:px-8 lg:px-12">
           <SectionHeading

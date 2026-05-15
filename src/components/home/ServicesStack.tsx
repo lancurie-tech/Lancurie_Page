@@ -11,6 +11,8 @@ type ServicesStackProps = {
   cardFallback: string;
   ctaLabel: string;
   accentTone?: 'cool' | 'warm';
+  /** Superfície da secção: ajusta dots, CTA e estado vazio (cartões continuam escuros). */
+  surface?: 'dark' | 'light';
   emptyMessage: React.ReactNode;
   onEmptyCta?: () => void;
   emptyCtaLabel?: string;
@@ -25,6 +27,7 @@ export function ServicesStack({
   cardFallback,
   ctaLabel,
   accentTone = 'cool',
+  surface = 'dark',
   emptyMessage,
   onEmptyCta,
   emptyCtaLabel,
@@ -114,15 +117,21 @@ export function ServicesStack({
   );
 
   if (sorted.length === 0) {
+    const emptyWrap =
+      surface === 'light'
+        ? 'mt-10 rounded-2xl border border-zinc-300/70 bg-white/70 px-6 py-10 text-center shadow-sm shadow-zinc-900/5 backdrop-blur-sm sm:px-10'
+        : 'mt-10 rounded-2xl border border-zinc-600/40 bg-zinc-900/35 px-6 py-10 text-center backdrop-blur-sm sm:px-10';
+    const emptyBtn =
+      surface === 'light'
+        ? 'mt-6 inline-flex items-center gap-2 rounded-xl border border-zinc-800/25 bg-zinc-900 px-5 py-2.5 text-sm font-semibold text-white transition-colors hover:border-zinc-800/50 hover:bg-zinc-800'
+        : 'mt-6 inline-flex items-center gap-2 rounded-xl border border-zinc-500/50 bg-zinc-950/60 px-5 py-2.5 text-sm font-semibold text-zinc-100 transition-colors hover:border-zinc-400/60 hover:bg-zinc-900/80';
     return (
-      <div className="mt-10 rounded-2xl border border-zinc-600/40 bg-zinc-900/35 px-6 py-10 text-center backdrop-blur-sm sm:px-10">
-        <div className="text-sm leading-relaxed text-zinc-400">{emptyMessage}</div>
+      <div className={emptyWrap}>
+        <div className={surface === 'light' ? 'text-sm leading-relaxed text-zinc-700' : 'text-sm leading-relaxed text-zinc-400'}>
+          {emptyMessage}
+        </div>
         {onEmptyCta && emptyCtaLabel ? (
-          <button
-            type="button"
-            className="mt-6 inline-flex items-center gap-2 rounded-xl border border-zinc-500/50 bg-zinc-950/60 px-5 py-2.5 text-sm font-semibold text-zinc-100 transition-colors hover:border-zinc-400/60 hover:bg-zinc-900/80"
-            onClick={onEmptyCta}
-          >
+          <button type="button" className={emptyBtn} onClick={onEmptyCta}>
             {emptyCtaLabel}
           </button>
         ) : null}
@@ -157,7 +166,7 @@ export function ServicesStack({
   return (
     <div className="mt-10">
       <div
-        className="relative mx-auto h-92 w-full max-w-296 overflow-x-hidden sm:h-108 md:h-116"
+        className="relative mx-auto h-92 w-full max-w-296 overflow-hidden sm:h-108 md:h-116"
         onMouseEnter={() => {
           clearHoverResumeTimeout();
           setHoverPaused(true);
@@ -250,7 +259,13 @@ export function ServicesStack({
                 }}
                 className={cn(
                   'h-1.5 rounded-full transition-all',
-                  i === active ? 'w-7 bg-zinc-200/88' : 'w-3 bg-zinc-600/75'
+                  surface === 'light'
+                    ? i === active
+                      ? 'w-7 bg-zinc-800'
+                      : 'w-3 bg-zinc-400/90'
+                    : i === active
+                      ? 'w-7 bg-zinc-200/88'
+                      : 'w-3 bg-zinc-600/75'
                 )}
                 aria-label={`Mostrar serviço ${i + 1}`}
               />
@@ -263,13 +278,19 @@ export function ServicesStack({
         <Link
           to="/servicos"
           className={cn(
-            'group relative inline-flex items-center overflow-hidden rounded-xl border px-5 py-2.5 text-sm font-semibold text-zinc-100 transition-all duration-300',
-            'border-white/22 bg-linear-to-b from-zinc-900/88 via-zinc-950/84 to-[#060607]/92 shadow-[0_14px_34px_-18px_rgba(0,0,0,0.78)] ring-1 ring-inset ring-white/[0.07]',
-            'hover:-translate-y-0.5 hover:border-white/38 hover:shadow-[0_22px_42px_-20px_rgba(0,0,0,0.85)]'
+            'group relative inline-flex items-center overflow-hidden rounded-xl border px-5 py-2.5 text-sm font-semibold transition-all duration-300',
+            surface === 'light'
+              ? 'border-zinc-800/25 bg-[#e8e8e0] text-zinc-900 shadow-[0_10px_28px_-14px_rgba(0,0,0,0.14)] ring-1 ring-inset ring-zinc-900/6 hover:-translate-y-0.5 hover:border-zinc-800/40 hover:bg-[#e2e2da] hover:shadow-[0_16px_36px_-16px_rgba(0,0,0,0.18)]'
+              : 'border-white/22 bg-linear-to-b from-zinc-900/88 via-zinc-950/84 to-[#060607]/92 text-zinc-100 shadow-[0_14px_34px_-18px_rgba(0,0,0,0.78)] ring-1 ring-inset ring-white/[0.07] hover:-translate-y-0.5 hover:border-white/38 hover:shadow-[0_22px_42px_-20px_rgba(0,0,0,0.85)]'
           )}
         >
           <span
-            className="pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100 bg-[radial-gradient(130%_95%_at_50%_0%,rgba(255,255,255,0.14),transparent_62%)]"
+            className={cn(
+              'pointer-events-none absolute inset-0 opacity-0 transition-opacity duration-300 group-hover:opacity-100',
+              surface === 'light'
+                ? 'bg-[radial-gradient(130%_95%_at_50%_0%,rgba(0,0,0,0.05),transparent_62%)]'
+                : 'bg-[radial-gradient(130%_95%_at_50%_0%,rgba(255,255,255,0.14),transparent_62%)]'
+            )}
             aria-hidden
           />
           <span className="relative">Conheça todos nossos serviços</span>
