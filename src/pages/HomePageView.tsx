@@ -152,12 +152,14 @@ export function HomePageView({
     document.documentElement.setAttribute('data-lancurie-palette', paletteTone);
   }, [paletteTone]);
 
+  const scrollHintLabel = p.hero.scrollHint.trim() || 'Explorar';
+
   const scrollHint = (
     <a
       href="#approach"
       className="flex flex-col items-center gap-2 text-[0.68rem] font-semibold uppercase tracking-[0.24em] text-zinc-400 transition-colors hover:text-zinc-200"
     >
-      {p.hero.scrollHint}
+      {scrollHintLabel}
       <ChevronDown className="h-4 w-4 text-zinc-600 motion-safe:animate-bounce" aria-hidden />
     </a>
   );
