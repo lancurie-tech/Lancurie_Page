@@ -50,8 +50,8 @@ export function HomePageView({
       </p>
       <h2
         className={cn(
-          'mt-3 text-balance font-display text-[1.95rem] font-semibold leading-[1.08] tracking-[-0.03em] sm:text-[2.4rem] md:text-[2.85rem]',
-          tone === 'light' ? 'text-zinc-950' : 'text-zinc-50'
+          'mt-3 text-balance font-display text-[1.95rem] leading-[1.08] tracking-[-0.03em] sm:text-[2.4rem] md:text-[2.85rem]',
+          tone === 'light' ? 'font-bold text-zinc-950' : 'font-semibold text-zinc-50'
         )}
       >
         {title}
