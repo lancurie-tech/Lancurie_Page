@@ -1,4 +1,12 @@
-import { type ReactNode, useId, useLayoutEffect, useMemo, useRef, useState } from 'react';
+import {
+  type ReactNode,
+  forwardRef,
+  useId,
+  useLayoutEffect,
+  useMemo,
+  useRef,
+  useState,
+} from 'react';
 import type { PrincipleItemContent } from '@/types/sitePublicContent';
 import { cn } from '@/lib/cn';
 
@@ -36,8 +44,11 @@ const ORBIT_HUB_PAN_X_STACKED = VB.w / 2 - VB.cx;
 /** Largura máx. do copy empilhado: coluna mais estreita (melhor medida de leitura + respiro em relação ao núcleo). */
 const STACKED_NODE_COPY_MAX = 'min(15.25rem, calc(100vw - 2.75rem))';
 
-/** Abaixo disto, disco + texto à direita deixa o copy ilegível — empilha texto por baixo do disco (ResizeObserver). */
-const ORBIT_SATELLITE_STACK_COPY_UNDER_PX = 600;
+/**
+ * Contentor órbita mais estreito que isto não tem espaço estável para disco + texto lateral sem o texto
+ * “invadir” o núcleo (tablets modo paisagem, coluna direita na grelha `lg`).
+ */
+const ORBIT_STACK_COPY_MAX_INLINE_PX = 800;
 
 /** Com copy empilhado, o puxão ao núcleo (útil para copy lateral) junta demais os nós — atenuar. */
 const ORBIT_STACKED_RADIAL_PULL_ATTENUATION = 0.26;
@@ -56,9 +67,9 @@ const SATELLITE_DISC_HALF_REM_MOBILE = 1.75;
  * Os feixes SVG terminam nos centros dos discos, não no texto.
  */
 const NODE_DISC_CENTERS_BASE = [
-  { bx: 106, by: 82 },
-  { bx: 624, by: 294 },
-  { bx: 178, by: 468 },
+  { bx: 146, by: 182 },
+  { bx: 550, by: 34 },
+  { bx: 428, by: 468 },
 ] as const;
 
 type DiscCenter = { bx: number; by: number };
@@ -397,15 +408,11 @@ function padSteps(items: PrincipleItemContent[]): PrincipleItemContent[] {
   return steps;
 }
 
-function SatelliteDisc({
-  index,
-  active,
-}: {
-  index: number;
-  active: boolean;
-}) {
+const SatelliteDisc = forwardRef<HTMLSpanElement, { index: number; active: boolean }>(
+  function SatelliteDisc({ index, active }, ref) {
   return (
     <span
+      ref={ref}
       className={cn(
         'relative isolate flex size-14 shrink-0 items-center justify-center rounded-full md:size-[3.95rem]',
         // Satélite “vidro” — highlight superior + bloom exterior (referência brilhosa)
@@ -430,7 +437,8 @@ function SatelliteDisc({
       </span>
     </span>
   );
-}
+  },
+);
 
 function StepTexts({
   baseId,
@@ -552,6 +560,10 @@ export function ApproachMethodFlow({
   const filterBlurId = `orbit-soft-${uid}`;
   const [hoverIdx, setHoverIdx] = useState<number | null>(null);
   const orbitMeasureRef = useRef<HTMLDivElement>(null);
+  /** Palco 680×540 + `transform` — mesmo espaço do `viewBox` para mapear o centro real do disco. */
+  const orbitGraphicRef = useRef<HTMLDivElement>(null);
+  const discRefs = useRef<(HTMLSpanElement | null)[]>([null, null, null]);
+  const [beamAnchorCenters, setBeamAnchorCenters] = useState<DiscCenter[] | null>(null);
   const [orbitScale, setOrbitScale] = useState(1);
   const [orbitWidthPx, setOrbitWidthPx] = useState(VB.w);
 
@@ -582,17 +594,74 @@ export function ApproachMethodFlow({
   }, []);
 
   const steps = padSteps(items);
-  const stackSatelliteCopy = orbitWidthPx < ORBIT_SATELLITE_STACK_COPY_UNDER_PX;
+  /** Uma só coluna (≤lg): copy lateral quase sempre colide visualmente com o núcleo; coluna órbita estreita idem. */
+  const stackSatelliteCopy =
+    orbitStackLayout || orbitWidthPx < ORBIT_STACK_COPY_MAX_INLINE_PX;
   const discCenters = useMemo(() => {
-    const stacked = orbitWidthPx < ORBIT_SATELLITE_STACK_COPY_UNDER_PX;
     let t = orbitRadialPullT(orbitWidthPx);
-    if (stacked) t *= ORBIT_STACKED_RADIAL_PULL_ATTENUATION;
+    if (stackSatelliteCopy) t *= ORBIT_STACKED_RADIAL_PULL_ATTENUATION;
     let centers = interpolateDiscCenters(NODE_DISC_CENTERS_BASE, t);
-    if (stacked) centers = spreadDiscCentersFromHub(centers, ORBIT_STACKED_EXTRA_SPREAD);
+    if (stackSatelliteCopy) centers = spreadDiscCentersFromHub(centers, ORBIT_STACKED_EXTRA_SPREAD);
     return centers;
-  }, [orbitWidthPx]);
-  const paths = useMemo(() => beamSpecs(discCenters), [discCenters]);
-  const weavePaths = useMemo(() => secondaryWeaveSpecs(discCenters), [discCenters]);
+  }, [orbitWidthPx, stackSatelliteCopy]);
+
+  useLayoutEffect(() => {
+    const orbit = orbitGraphicRef.current;
+    if (!orbit) return;
+
+    let rafId = 0;
+    let cancelled = false;
+
+    const applyMeasuredCenters = () => {
+      const or = orbit.getBoundingClientRect();
+      const wBox = or.width || 1;
+      const hBox = or.height || 1;
+
+      const next = discRefs.current.map((el, i): DiscCenter => {
+        if (!el) return discCenters[i]!;
+        const dr = el.getBoundingClientRect();
+        return {
+          bx: VB.w * ((dr.left + dr.width / 2 - or.left) / wBox),
+          by: VB.h * ((dr.top + dr.height / 2 - or.top) / hBox),
+        };
+      });
+
+      setBeamAnchorCenters((prev) => {
+        if (
+          prev &&
+          prev.length === next.length &&
+          prev.every((p, j) => Math.abs(p.bx - next[j]!.bx) < 0.25 && Math.abs(p.by - next[j]!.by) < 0.25)
+        ) {
+          return prev;
+        }
+        return next;
+      });
+    };
+
+    /** Síncrono no layout para o primeiro paint já coincidir com o disco renderizado. */
+    applyMeasuredCenters();
+
+    const ro = new ResizeObserver(() => {
+      cancelAnimationFrame(rafId);
+      rafId = requestAnimationFrame(applyMeasuredCenters);
+    });
+    ro.observe(orbit);
+
+    void document.fonts?.ready.then(() => {
+      if (!cancelled) applyMeasuredCenters();
+    });
+
+    return () => {
+      cancelled = true;
+      cancelAnimationFrame(rafId);
+      ro.disconnect();
+    };
+    // Hover altera escala no disco (~1); re-medir mantém feixes no centro perceptível.
+  }, [discCenters, hoverIdx, orbitStackLayout, orbitScale, stackSatelliteCopy]);
+
+  const centersForBeams = beamAnchorCenters ?? discCenters;
+  const paths = useMemo(() => beamSpecs(centersForBeams), [centersForBeams]);
+  const weavePaths = useMemo(() => secondaryWeaveSpecs(centersForBeams), [centersForBeams]);
 
   const processSplit = splitProcessHeading(title);
   const leadDisplayed = lead.trim() || PROCESS_SECTION_LEAD_DEFAULT;
@@ -645,6 +714,7 @@ export function ApproachMethodFlow({
               }}
             >
               <div
+                ref={orbitGraphicRef}
                 className="absolute left-0 top-0 will-change-transform"
                 style={{
                   width: VB.w,
@@ -825,7 +895,15 @@ export function ApproachMethodFlow({
                         stacked={stackSatelliteCopy}
                         inlineMirror={inlineMirror}
                         stackedTightEnd={stackedTightEnd}
-                        circle={<SatelliteDisc index={i} active={isHot} />}
+                        circle={
+                          <SatelliteDisc
+                            ref={(el) => {
+                              discRefs.current[i] = el;
+                            }}
+                            index={i}
+                            active={isHot}
+                          />
+                        }
                         copy={<StepTexts baseId={baseId} row={row} isHot={isHot} comfortable={stackSatelliteCopy} />}
                       />
                     </button>
